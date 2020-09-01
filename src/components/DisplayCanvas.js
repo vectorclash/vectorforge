@@ -9,6 +9,8 @@ import LargeRadialField from './Canvas/LargeRadialField'
 import GenerateLargeRadialField from './Canvas/GenerateLargeRadialField'
 // import StarField from './Canvas/StarField'
 
+import FileName from './FileNameGenerator'
+
 import s1 from '../assets/images/star-sprite-large.png'
 import s2 from '../assets/images/star-sprite-small.png'
 
@@ -85,7 +87,8 @@ export default class DisplayCanvas extends React.Component {
   }
 
   saveImageToAirtable() {
-    let newID = 'NewImage' + Math.round(Math.random() * 10000000)
+    let newID = FileName()
+    console.log(newID)
     this.base('Images').create([
       {
         "fields": {
@@ -139,6 +142,8 @@ export default class DisplayCanvas extends React.Component {
   }
 
   onGenerateButtonClick(e) {
+    let imageIDField = document.querySelector('#imageID')
+    imageIDField.value = ''
     this.buildImage()
   }
 
@@ -148,7 +153,7 @@ export default class DisplayCanvas extends React.Component {
         <div className='controls'>
           <button onClick={this.onGenerateButtonClick.bind(this)}>Generate Image</button>
           <button onClick={this.onSaveButtonClick.bind(this)}>Save Image</button>
-          <input type="text" id="imageID" name="imageID"></input>
+          <input type="search" id="imageID" name="imageID"></input>
           <button onClick={this.onLoadButtonClick.bind(this)}>Load Image</button>
         </div>
       </div>

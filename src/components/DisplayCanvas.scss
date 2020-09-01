@@ -10,4 +10,26 @@
   background-repeat: no-repeat;
   transition: 1s;
   background-color: #befc3a;
+
+  .controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 150px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: left;
+    flex-direction: column;
+
+    button, input {
+      display: inline-block;
+      margin-bottom: 10px;
+      height: 42px;
+    }
+
+    input {
+      font-size: 11px;
+      text-align: center;
+    }
+  }
 }
