@@ -27,16 +27,20 @@ export default class DisplayCanvas extends React.Component {
     ]
 
     this.queue = new createjs.LoadQueue(true, '')
-    this.queue.on('complete', this.buildImage, this)
+    this.queue.on('complete', this.init, this)
     this.queue.loadManifest(queueItems)
   }
 
-  buildImage() {
+  init() {
     this.canvas = document.createElement('canvas')
     this.context = this.canvas.getContext('2d')
 
     this.canvas.width = this.props.width
     this.canvas.height = this.props.height
+  }
+
+  buildImage() {
+    this.context.clearRect(0, 0, this.props.width, this.props.height)
 
     this.mainConfig = {}
     this.mainConfig.width = this.props.width
@@ -66,11 +70,26 @@ export default class DisplayCanvas extends React.Component {
     this.canvas.toBlob(this.setImage.bind(this))
   }
 
+  rebuildImage(config) {
+    this.context.clearRect(0, 0, config.width, config.height)
+
+    let gradientBackground = new LinearGradient(config.gradientBackgroundConfig)
+    this.context.drawImage(gradientBackground, 0, 0)
+
+    this.context.globalCompositeOperation = 'overlay'
+
+    let radialField = new LargeRadialField(config.radialFieldConfig)
+    this.context.drawImage(radialField, 0, 0)
+
+    this.canvas.toBlob(this.setImage.bind(this))
+  }
+
   saveImageToAirtable() {
+    let newID = 'NewImage' + Math.round(Math.random() * 10000000)
     this.base('Images').create([
       {
         "fields": {
-          "ID": "NewImage" + Math.random() * 10000000,
+          "ID": newID,
           "Configuration": JSON.stringify(this.mainConfig)
         }
       }
@@ -80,9 +99,23 @@ export default class DisplayCanvas extends React.Component {
         return
       }
       records.forEach(function (record) {
-        console.log(record.getId())
+        let imageIDField = document.querySelector('#imageID')
+        imageIDField.value = newID
       })
     })
+  }
+
+  loadImageFromAirtable(id) {
+    this.base('Images').select({
+      filterByFormula: "({ID} = '" + id + "')"
+    }).firstPage(function(err, records) {
+      if(err) {
+        console.error(err)
+        return
+      }
+
+      this.rebuildImage(JSON.parse(records[0].fields.Configuration))
+    }.bind(this))
   }
 
   setImage(blob) {
@@ -90,9 +123,35 @@ export default class DisplayCanvas extends React.Component {
     this.mount.style.backgroundImage = 'url(' + url + ')'
   }
 
+  // event handlers
+
+  onLoadButtonClick(e) {
+    let imageIDField = document.querySelector('#imageID')
+    if(imageIDField.value) {
+      this.loadImageFromAirtable(imageIDField.value)
+    }
+  }
+
+  onSaveButtonClick(e) {
+    if(this.mainConfig) {
+      this.saveImageToAirtable()
+    }
+  }
+
+  onGenerateButtonClick(e) {
+    this.buildImage()
+  }
+
   render() {
     return (
-      <div className='display-canvas' ref={mount => {this.mount = mount}}></div>
+      <div className='display-canvas' ref={mount => {this.mount = mount}}>
+        <div className='controls'>
+          <button onClick={this.onGenerateButtonClick.bind(this)}>Generate Image</button>
+          <button onClick={this.onSaveButtonClick.bind(this)}>Save Image</button>
+          <input type="text" id="imageID" name="imageID"></input>
+          <button onClick={this.onLoadButtonClick.bind(this)}>Load Image</button>
+        </div>
+      </div>
     )
   }
 }
