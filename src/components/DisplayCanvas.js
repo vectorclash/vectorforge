@@ -7,7 +7,8 @@ import LinearGradient from './Canvas/LinearGradient'
 import GenerateLinearGradient from './Canvas/GenerateLinearGradient'
 import LargeRadialField from './Canvas/LargeRadialField'
 import GenerateLargeRadialField from './Canvas/GenerateLargeRadialField'
-// import StarField from './Canvas/StarField'
+import GenerateStarField from './Canvas/GenerateStarField'
+import StarField from './Canvas/StarField'
 
 import FileName from './FileNameGenerator'
 
@@ -39,6 +40,23 @@ export default class DisplayCanvas extends React.Component {
 
     this.canvas.width = this.props.width
     this.canvas.height = this.props.height
+
+    this.blendModes = [
+      'screen',
+      'overlay',
+      'multiply',
+      'hard-light',
+      'lighten',
+      'darken',
+      'soft-light',
+      'source-over'
+    ]
+
+    const urlParams = new URLSearchParams(window.location.search)
+    const id = urlParams.get('id')
+    if(id) {
+      this.loadImageFromAirtable(id)
+    }
   }
 
   buildImage() {
@@ -53,21 +71,22 @@ export default class DisplayCanvas extends React.Component {
     let gradientBackground = new LinearGradient(gradientBackgroundConfig)
     this.context.drawImage(gradientBackground, 0, 0)
 
-    this.context.globalCompositeOperation = 'overlay'
+    this.mainConfig.firstBlend = this.randomBlendMode()
+    this.context.globalCompositeOperation = this.mainConfig.firstBlend
 
     let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height)
     this.mainConfig.radialFieldConfig = radialFieldConfig
     let radialField = new LargeRadialField(radialFieldConfig)
     this.context.drawImage(radialField, 0, 0)
 
-    // this.context.globalCompositeOperation = 'hard-light'
-    //
-    // let starField = new StarField(
-    //   this.props.width,
-    //   this.props.height,
-    //   [this.queue.getResult('star-large'), this.queue.getResult('star-small')]
-    // )
-    // this.context.drawImage(starField, 0, 0)
+    let starFieldConfig = new GenerateStarField(this.props.width, this.props.height)
+    this.mainConfig.starFieldConfig = starFieldConfig
+
+    this.mainConfig.secondBlend = this.randomBlendMode()
+    this.context.globalCompositeOperation = this.mainConfig.secondBlend
+
+    let starField = new StarField(starFieldConfig, this.queue)
+    this.context.drawImage(starField, 0, 0)
 
     this.canvas.toBlob(this.setImage.bind(this))
   }
@@ -78,17 +97,22 @@ export default class DisplayCanvas extends React.Component {
     let gradientBackground = new LinearGradient(config.gradientBackgroundConfig)
     this.context.drawImage(gradientBackground, 0, 0)
 
-    this.context.globalCompositeOperation = 'overlay'
+    this.context.globalCompositeOperation = config.firstBlend
 
     let radialField = new LargeRadialField(config.radialFieldConfig)
     this.context.drawImage(radialField, 0, 0)
+
+    this.context.globalCompositeOperation = config.secondBlend
+
+    let starField = new StarField(config.starFieldConfig, this.queue)
+    this.context.drawImage(starField, 0, 0)
 
     this.canvas.toBlob(this.setImage.bind(this))
   }
 
   saveImageToAirtable() {
     let newID = FileName()
-    console.log(newID)
+
     this.base('Images').create([
       {
         "fields": {
@@ -124,6 +148,11 @@ export default class DisplayCanvas extends React.Component {
   setImage(blob) {
     let url = URL.createObjectURL(blob)
     this.mount.style.backgroundImage = 'url(' + url + ')'
+  }
+
+  randomBlendMode() {
+    let randomBlendMode = Math.floor(Math.random() * this.blendModes.length)
+    return this.blendModes[randomBlendMode]
   }
 
   // event handlers

@@ -1,139 +1,41 @@
 import LinearGradient from './LinearGradient'
 
 export default class StarField {
-  constructor(width, height, images, config = null) {
-    this.canvas = document.createElement('canvas')
-    this.context = this.canvas.getContext('2d')
+  constructor(config, images) {
+    let canvas = document.createElement('canvas')
+    let context = canvas.getContext('2d')
 
-    this.canvas.width = width
-    this.canvas.height = height
+    canvas.width = config.width
+    canvas.height = config.height
 
-    this.config = config
+    context.globalCompositeOperation = 'destination-atop'
 
-    if(!this.config) {
-      this.config = this.generateNew()
+    let gradient = new LinearGradient(config.gradientConfig)
+    context.drawImage(gradient, 0, 0)
+
+    let starCanvas = document.createElement('canvas')
+    let starContext = starCanvas.getContext('2d')
+
+    starCanvas.width = config.width
+    starCanvas.height = config.height
+
+    for (let i = 0; i < config.stars.length; i++) {
+      starContext.drawImage(images.getResult(config.stars[i].image), config.stars[i].x, config.stars[i].y, config.stars[i].size, config.stars[i].size)
     }
 
-    this.context.globalCompositeOperation = 'destination-atop'
+    let smallStarSizeMax = config.width / 500
+    let smallStarSizeMin = config.width / 5000
 
-    // let gradient = new LinearGradient(width, height)
-    // this.context.drawImage(gradient.canvas, 0, 0)
-    //
-    // let starCanvas = document.createElement('canvas')
-    // let starContext = starCanvas.getContext('2d')
-    //
-    // starCanvas.width = width
-    // starCanvas.height = height
-    //
-    // let xlStarSizeMax = width / 2
-    // let xlStarSizeMin = width / 20
-    //
-    // for (let i = 0; i < 5; i++) {
-    //   let ranSize = xlStarSizeMin + Math.random() * xlStarSizeMax
-    //   let ranX = -100 + Math.random() * width + 100
-    //   let ranY = -100 + Math.random() * height + 100
-    //
-    //   starContext.drawImage(images[0], ranX, ranY, ranSize, ranSize)
-    // }
-    //
-    // let largeStarSizeMax = width / 7
-    // let largeStarSizeMin = width / 150
-    //
-    // for (let i = 0; i < 50; i++) {
-    //   let ranSize = largeStarSizeMin + Math.random() * largeStarSizeMax
-    //   let ranX = -100 + Math.random() * width + 100
-    //   let ranY = -100 + Math.random() * height + 100
-    //
-    //   starContext.drawImage(images[0], ranX, ranY, ranSize, ranSize)
-    // }
-    //
-    // let mediumStarSizeMax = width / 100
-    // let mediumStarSizeMin = width / 5000
-    //
-    // for (let i = 0; i < 200; i++) {
-    //   let ranSize = mediumStarSizeMin + Math.random() * mediumStarSizeMax
-    //   let ranX = -100 + Math.random() * width + 100
-    //   let ranY = -100 + Math.random() * height + 100
-    //
-    //   starContext.drawImage(images[1], ranX, ranY, ranSize, ranSize)
-    // }
-    //
-    // let smallStarSizeMax = width / 350
-    // let smallStarSizeMin = width / 10000
-    //
-    // let smallStarAmount = 5000 + Math.round(Math.random() * 5000)
-    //
-    // for (let i = 0; i < smallStarAmount; i++) {
-    //   let ranSize = smallStarSizeMin + Math.random() * smallStarSizeMax
-    //   let ranX = -100 + Math.random() * width + 100
-    //   let ranY = -100 + Math.random() * height + 100
-    //
-    //   starContext.drawImage(images[1], ranX, ranY, ranSize, ranSize)
-    // }
+    for (let i = 0; i < config.smallStarAmount; i++) {
+      let ranSize = smallStarSizeMin + Math.random() * smallStarSizeMax
+      let ranX = -100 + Math.random() * config.width + 100
+      let ranY = -100 + Math.random() * config.height + 100
 
-    // this.context.drawImage(starCanvas, 0, 0)
+      starContext.drawImage(images.getResult('star-small'), ranX, ranY, ranSize, ranSize)
+    }
 
-    return this
-  }
+    context.drawImage(starCanvas, 0, 0)
 
-  generateNew() {
-    let config = {}
-
-    // let gradient = new LinearGradient(width, height)
-    // this.context.drawImage(gradient.canvas, 0, 0)
-    //
-    // let starCanvas = document.createElement('canvas')
-    // let starContext = starCanvas.getContext('2d')
-    //
-    // starCanvas.width = width
-    // starCanvas.height = height
-    //
-    // let xlStarSizeMax = width / 2
-    // let xlStarSizeMin = width / 20
-    //
-    // for (let i = 0; i < 5; i++) {
-    //   let ranSize = xlStarSizeMin + Math.random() * xlStarSizeMax
-    //   let ranX = -100 + Math.random() * width + 100
-    //   let ranY = -100 + Math.random() * height + 100
-    //
-    //   starContext.drawImage(images[0], ranX, ranY, ranSize, ranSize)
-    // }
-    //
-    // let largeStarSizeMax = width / 7
-    // let largeStarSizeMin = width / 150
-    //
-    // for (let i = 0; i < 50; i++) {
-    //   let ranSize = largeStarSizeMin + Math.random() * largeStarSizeMax
-    //   let ranX = -100 + Math.random() * width + 100
-    //   let ranY = -100 + Math.random() * height + 100
-    //
-    //   starContext.drawImage(images[0], ranX, ranY, ranSize, ranSize)
-    // }
-    //
-    // let mediumStarSizeMax = width / 100
-    // let mediumStarSizeMin = width / 5000
-    //
-    // for (let i = 0; i < 200; i++) {
-    //   let ranSize = mediumStarSizeMin + Math.random() * mediumStarSizeMax
-    //   let ranX = -100 + Math.random() * width + 100
-    //   let ranY = -100 + Math.random() * height + 100
-    //
-    //   starContext.drawImage(images[1], ranX, ranY, ranSize, ranSize)
-    // }
-    //
-    // let smallStarSizeMax = width / 350
-    // let smallStarSizeMin = width / 10000
-    //
-    // let smallStarAmount = 5000 + Math.round(Math.random() * 5000)
-    //
-    // for (let i = 0; i < smallStarAmount; i++) {
-    //   let ranSize = smallStarSizeMin + Math.random() * smallStarSizeMax
-    //   let ranX = -100 + Math.random() * width + 100
-    //   let ranY = -100 + Math.random() * height + 100
-    //
-    //   starContext.drawImage(images[1], ranX, ranY, ranSize, ranSize)
-    // }
-
-    return config
+    return canvas
   }
 }
