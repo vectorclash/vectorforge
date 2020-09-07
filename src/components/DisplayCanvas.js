@@ -1,6 +1,8 @@
 import React from 'react'
 import createjs from 'preload-js'
 import Airtable from 'airtable'
+import gsap from 'gsap'
+import tinycolor from 'tinycolor2'
 import './DisplayCanvas.scss'
 
 import Logo from './Logo'
@@ -90,6 +92,10 @@ export default class DisplayCanvas extends React.Component {
     let gradientBackground = new LinearGradient(gradientBackgroundConfig)
     this.context.drawImage(gradientBackground, 0, 0)
 
+    // change buttons to match backgroundImage
+    this.changeGradient(gradientBackgroundConfig.colors)
+    //
+
     this.mainConfig.firstBlend = this.randomBlendMode()
     this.context.globalCompositeOperation = this.mainConfig.firstBlend
 
@@ -116,6 +122,10 @@ export default class DisplayCanvas extends React.Component {
     let gradientBackground = new LinearGradient(config.gradientBackgroundConfig)
     this.context.drawImage(gradientBackground, 0, 0)
 
+    // change buttons to match backgroundImage
+    this.changeGradient(config.gradientBackgroundConfig.colors)
+    //
+
     this.context.globalCompositeOperation = config.firstBlend
 
     let radialField = new LargeRadialField(config.radialFieldConfig)
@@ -127,6 +137,22 @@ export default class DisplayCanvas extends React.Component {
     this.context.drawImage(starField, 0, 0)
 
     this.canvas.toBlob(this.setImage.bind(this))
+  }
+
+  changeGradient(colors) {
+    let buttonGradient = 'linear-gradient(42deg, ' + colors[0] + ', ' + colors[colors.length-1] + ')'
+    let buttonColor
+
+    if(tinycolor(colors[0]).isLight() && tinycolor(colors[colors.length-1]).isLight()) {
+      buttonColor = '#333333'
+    } else {
+      buttonColor = '#FAFAFA'
+    }
+
+    gsap.set('button', {
+      backgroundImage: buttonGradient,
+      color: buttonColor
+    })
   }
 
   saveImageToAirtable() {
@@ -216,7 +242,9 @@ export default class DisplayCanvas extends React.Component {
     return (
       <div className='display-canvas' ref={mount => {this.mount = mount}}>
         {isLoading ? <HexagonLoader /> : ''}
+        <div className='controls-tab'></div>
         <div className='controls'>
+          <h1>VECTOR<strong>FORGE</strong></h1>
           <button onClick={this.onGenerateButtonClick.bind(this)}>Generate Image</button>
           <button onClick={this.onSaveButtonClick.bind(this)}>Save Image</button>
           <input type="search" id="imageID" name="imageID"></input>
