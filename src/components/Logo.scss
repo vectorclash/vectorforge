@@ -1,0 +1,31 @@
+.logo {
+  align-self: center;
+  width: 75px;
+  height: 75px;
+  margin-top: 15px;
+  margin-left: -12px;
+  opacity: 0;
+
+  svg {
+    overflow: visible;
+    max-width: 75px;
+
+    line {
+      fill: none;
+      stroke: #FFFFFF;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10;
+    }
+
+    path {
+      fill: none;
+      stroke: #FFFFFF;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10;
+    }
+  }
+}

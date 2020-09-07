@@ -5,6 +5,8 @@ export default class LargeRadialField {
     let canvas = document.createElement('canvas')
     let context = canvas.getContext('2d')
 
+    context.filter = 'blur(30px)'
+
     canvas.width = config.width
     canvas.height = config.height
 

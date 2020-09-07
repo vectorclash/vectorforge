@@ -3,6 +3,9 @@ import createjs from 'preload-js'
 import Airtable from 'airtable'
 import './DisplayCanvas.scss'
 
+import Logo from './Logo'
+import HexagonLoader from './HexagonLoader'
+
 import LinearGradient from './Canvas/LinearGradient'
 import GenerateLinearGradient from './Canvas/GenerateLinearGradient'
 import LargeRadialField from './Canvas/LargeRadialField'
@@ -16,6 +19,13 @@ import s1 from '../assets/images/star-sprite-large.png'
 import s2 from '../assets/images/star-sprite-small.png'
 
 export default class DisplayCanvas extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      isLoading: false
+    }
+  }
+
   componentDidMount() {
     Airtable.configure({
       endpointUrl: 'https://api.airtable.com',
@@ -35,11 +45,7 @@ export default class DisplayCanvas extends React.Component {
   }
 
   init() {
-    this.canvas = document.createElement('canvas')
-    this.context = this.canvas.getContext('2d')
-
-    this.canvas.width = this.props.width
-    this.canvas.height = this.props.height
+    this.setCanvas()
 
     this.blendModes = [
       'screen',
@@ -55,12 +61,25 @@ export default class DisplayCanvas extends React.Component {
     const urlParams = new URLSearchParams(window.location.search)
     const id = urlParams.get('id')
     if(id) {
+      this.setState({
+        isLoading: true
+      })
       this.loadImageFromAirtable(id)
     }
   }
 
+  setCanvas() {
+    this.canvas = document.createElement('canvas')
+    this.context = this.canvas.getContext('2d')
+
+    this.canvas.width = this.props.width
+    this.canvas.height = this.props.height
+
+    this.mount.style.backgroundImage = 'none'
+  }
+
   buildImage() {
-    this.context.clearRect(0, 0, this.props.width, this.props.height)
+    this.setCanvas()
 
     this.mainConfig = {}
     this.mainConfig.width = this.props.width
@@ -92,7 +111,7 @@ export default class DisplayCanvas extends React.Component {
   }
 
   rebuildImage(config) {
-    this.context.clearRect(0, 0, config.width, config.height)
+    this.setCanvas()
 
     let gradientBackground = new LinearGradient(config.gradientBackgroundConfig)
     this.context.drawImage(gradientBackground, 0, 0)
@@ -141,13 +160,19 @@ export default class DisplayCanvas extends React.Component {
         return
       }
 
-      this.rebuildImage(JSON.parse(records[0].fields.Configuration))
+      if(records[0]) {
+        this.rebuildImage(JSON.parse(records[0].fields.Configuration))
+      }
     }.bind(this))
   }
 
   setImage(blob) {
     let url = URL.createObjectURL(blob)
     this.mount.style.backgroundImage = 'url(' + url + ')'
+
+    this.setState({
+      isLoading: false
+    })
   }
 
   randomBlendMode() {
@@ -160,6 +185,9 @@ export default class DisplayCanvas extends React.Component {
   onLoadButtonClick(e) {
     let imageIDField = document.querySelector('#imageID')
     if(imageIDField.value) {
+      this.setState({
+        isLoading: true
+      })
       this.loadImageFromAirtable(imageIDField.value)
     }
   }
@@ -171,19 +199,29 @@ export default class DisplayCanvas extends React.Component {
   }
 
   onGenerateButtonClick(e) {
+    this.setState({
+      isLoading: true
+    })
+
     let imageIDField = document.querySelector('#imageID')
     imageIDField.value = ''
     this.buildImage()
   }
 
+  //
+
   render() {
+    const {isLoading} = this.state
+
     return (
       <div className='display-canvas' ref={mount => {this.mount = mount}}>
+        {isLoading ? <HexagonLoader /> : ''}
         <div className='controls'>
           <button onClick={this.onGenerateButtonClick.bind(this)}>Generate Image</button>
           <button onClick={this.onSaveButtonClick.bind(this)}>Save Image</button>
           <input type="search" id="imageID" name="imageID"></input>
           <button onClick={this.onLoadButtonClick.bind(this)}>Load Image</button>
+          <Logo />
         </div>
       </div>
     )
