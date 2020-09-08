@@ -20,7 +20,7 @@
   .controls {
     position: absolute;
     top: 0px;
-    right: -220px;
+    right: -240px;
     padding: 5vh;
     width: 150px;
     height: 90vh;
@@ -60,6 +60,8 @@
       background-color: #ff007a;
       color: #fafafa;
       cursor: pointer;
+      font-size: 10px;
+      text-transform: uppercase;
     }
 
     button:hover {
@@ -123,5 +125,21 @@
     opacity: 0;
     width: 10px;
     left: -10px;
+    background-color: rgba(51, 0, 82, 1);
+  }
+
+  .controls:after {
+    position: absolute;
+    width: 100px;
+    height: 100vh;
+    left: -100px;
+    top: 0;
+    content: '';
+    transition: 0.3s;
+  }
+
+  .controls:hover:after {
+    width: 0;
+    left: 0;
   }
 }
