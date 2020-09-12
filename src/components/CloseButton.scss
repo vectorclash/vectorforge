@@ -1,0 +1,42 @@
+.close-button {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+
+  rect {
+    stroke: #c11fdb;
+    stroke-width: 80;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-miterlimit: 10;
+    display: none;
+  }
+
+  path {
+    stroke: #c11fdb;
+    fill: #c11fdb;
+    stroke-width: 80;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-miterlimit: 10;
+  }
+
+  #center-EX {
+    display: none;
+  }
+
+  #dot-EX {
+    display: none;
+  }
+
+  #inner {
+    fill: #ec007f;
+    stroke: none;
+  }
+
+  #outer {
+    fill: #3f0049;
+    stroke: none;
+  }
+}

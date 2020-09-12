@@ -1,20 +1,21 @@
 import React from 'react'
 import createjs from 'preload-js'
 import Airtable from 'airtable'
-import gsap from 'gsap'
+import {gsap, Quad, Back} from 'gsap'
 import tinycolor from 'tinycolor2'
+import saveAs from 'file-saver'
+
 import './DisplayCanvas.scss'
 
 import Logo from './Logo'
 import HexagonLoader from './HexagonLoader'
-
+import CloseButton from './CloseButton'
 import LinearGradient from './Canvas/LinearGradient'
 import GenerateLinearGradient from './Canvas/GenerateLinearGradient'
 import LargeRadialField from './Canvas/LargeRadialField'
 import GenerateLargeRadialField from './Canvas/GenerateLargeRadialField'
 import GenerateStarField from './Canvas/GenerateStarField'
 import StarField from './Canvas/StarField'
-
 import FileName from './FileNameGenerator'
 
 import s1 from '../assets/images/star-sprite-large.png'
@@ -24,7 +25,9 @@ export default class DisplayCanvas extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      isLoading: false
+      isLoading: false,
+      controlsAreOpen: true,
+      activeImage: ''
     }
   }
 
@@ -66,6 +69,7 @@ export default class DisplayCanvas extends React.Component {
       this.setState({
         isLoading: true
       })
+      this.onCloseButtonClick()
       this.loadImageFromAirtable(id)
     }
   }
@@ -149,19 +153,34 @@ export default class DisplayCanvas extends React.Component {
       buttonColor = '#FAFAFA'
     }
 
-    gsap.set('button', {
+    gsap.set('.button-full', {
       backgroundImage: buttonGradient,
       color: buttonColor
+    })
+
+    let borderColor = colors[Math.floor(Math.random() * colors.length)]
+
+    gsap.set('.button-small, input', {
+      borderColor: borderColor
     })
   }
 
   saveImageToAirtable() {
-    let newID = FileName()
+    let id
+    if(!this.state.activeImage) {
+      id = FileName()
+
+      this.setState({
+        activeImage: id
+      })
+    } else {
+      id = this.state.activeImage
+    }
 
     this.base('Images').create([
       {
         "fields": {
-          "ID": newID,
+          "ID": id,
           "Configuration": JSON.stringify(this.mainConfig)
         }
       }
@@ -172,12 +191,18 @@ export default class DisplayCanvas extends React.Component {
       }
       records.forEach(function (record) {
         let imageIDField = document.querySelector('#imageID')
-        imageIDField.value = newID
+        imageIDField.value = id
       })
     })
   }
 
   loadImageFromAirtable(id) {
+    if(!this.state.activeImage) {
+      this.setState({
+        activeImage: id
+      })
+    }
+
     this.base('Images').select({
       filterByFormula: "({ID} = '" + id + "')"
     }).firstPage(function(err, records) {
@@ -214,7 +239,19 @@ export default class DisplayCanvas extends React.Component {
       this.setState({
         isLoading: true
       })
+
       this.loadImageFromAirtable(imageIDField.value)
+    } else {
+      gsap.to('input', {
+        duration: 0.1,
+        scale: 1.1,
+        rotation: -0.3,
+        skewY: 3,
+        boxShadow: '0px 0px 10px white',
+        yoyo: true,
+        repeat: 1,
+        ease: Quad.easeInOut
+      })
     }
   }
 
@@ -224,6 +261,18 @@ export default class DisplayCanvas extends React.Component {
     }
   }
 
+  onDownloadButtonClick(e) {
+    if(!this.state.activeImage) {
+      this.setState({
+        activeImage: FileName()
+      })
+    }
+
+    this.canvas.toBlob(function(blob) {
+      saveAs(blob, this.state.activeImage + '.png')
+    }.bind(this))
+  }
+
   onGenerateButtonClick(e) {
     this.setState({
       isLoading: true
@@ -231,25 +280,84 @@ export default class DisplayCanvas extends React.Component {
 
     let imageIDField = document.querySelector('#imageID')
     imageIDField.value = ''
+    this.onCloseButtonClick()
     this.buildImage()
+  }
+
+  onCloseButtonClick(e) {
+    const {controlsAreOpen} = this.state
+
+    if(controlsAreOpen) {
+      this.setState({
+        controlsAreOpen: false
+      })
+
+      gsap.to('.controls-container', {
+        duration: 0.3,
+        alpha: 0,
+        ease: Quad.easeInOut,
+        onComplete: () => {
+          gsap.set('.controls-container', {
+            display: 'none'
+          })
+        }
+      })
+    } else {
+      this.setState({
+        controlsAreOpen: true
+      })
+
+      gsap.to('.controls-container', {
+        duration: 0.3,
+        alpha: 1,
+        ease: Quad.easeInOut,
+        onStart: () => {
+          gsap.set('.controls-container', {
+            display: 'flex'
+          })
+        }
+      })
+
+      gsap.from('.row, .logo', {
+        duration: 0.5,
+        alpha: 0,
+        y: 42,
+        stagger: 0.05,
+        ease: Back.easeOut
+      })
+    }
   }
 
   //
 
   render() {
-    const {isLoading} = this.state
+    const {isLoading, controlsAreOpen} = this.state
 
     return (
       <div className='display-canvas' ref={mount => {this.mount = mount}}>
         {isLoading ? <HexagonLoader /> : ''}
-        <div className='controls-tab'></div>
-        <div className='controls'>
-          <h1>VECTOR<strong>FORGE</strong></h1>
-          <button onClick={this.onGenerateButtonClick.bind(this)}>Generate Image</button>
-          <button onClick={this.onSaveButtonClick.bind(this)}>Save Image</button>
-          <input type="search" id="imageID" name="imageID"></input>
-          <button onClick={this.onLoadButtonClick.bind(this)}>Load Image</button>
-          <Logo />
+        <div className="controls-open" onClick={this.onCloseButtonClick.bind(this)}>
+          <CloseButton isOpen={controlsAreOpen} />
+        </div>
+        <div className="controls-container">
+          <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div>
+          <div className="controls-inner">
+            <div className="row">
+              <h1>VECTOR<b>FORGE</b></h1>
+            </div>
+            <div className="row">
+              <button onClick={this.onGenerateButtonClick.bind(this)} className="button-full">Generate</button>
+            </div>
+            <div className="row">
+              <button onClick={this.onSaveButtonClick.bind(this)} className="button-small">Save</button>
+              <button onClick={this.onDownloadButtonClick.bind(this)} className="button-small">Download</button>
+            </div>
+            <div className="row">
+              <button onClick={this.onLoadButtonClick.bind(this)} className="button-small">Load</button>
+              <input type="search" id="imageID" name="imageID"></input>
+            </div>
+            <Logo />
+          </div>
         </div>
       </div>
     )
