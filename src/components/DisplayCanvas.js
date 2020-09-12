@@ -117,6 +117,10 @@ export default class DisplayCanvas extends React.Component {
     let starField = new StarField(starFieldConfig, this.queue)
     this.context.drawImage(starField, 0, 0)
 
+    this.setState({
+      activeImage: FileName()
+    })
+
     this.canvas.toBlob(this.setImage.bind(this))
   }
 
@@ -166,16 +170,7 @@ export default class DisplayCanvas extends React.Component {
   }
 
   saveImageToAirtable() {
-    let id
-    if(!this.state.activeImage) {
-      id = FileName()
-
-      this.setState({
-        activeImage: id
-      })
-    } else {
-      id = this.state.activeImage
-    }
+    let id = this.state.activeImage
 
     this.base('Images').create([
       {
@@ -197,12 +192,6 @@ export default class DisplayCanvas extends React.Component {
   }
 
   loadImageFromAirtable(id) {
-    if(!this.state.activeImage) {
-      this.setState({
-        activeImage: id
-      })
-    }
-
     this.base('Images').select({
       filterByFormula: "({ID} = '" + id + "')"
     }).firstPage(function(err, records) {
@@ -212,6 +201,9 @@ export default class DisplayCanvas extends React.Component {
       }
 
       if(records[0]) {
+        this.setState({
+          activeImage: id
+        })
         this.rebuildImage(JSON.parse(records[0].fields.Configuration))
       }
     }.bind(this))
@@ -239,15 +231,14 @@ export default class DisplayCanvas extends React.Component {
       this.setState({
         isLoading: true
       })
-
+      this.onCloseButtonClick()
       this.loadImageFromAirtable(imageIDField.value)
     } else {
       gsap.to('input', {
         duration: 0.1,
-        scale: 1.1,
-        rotation: -0.3,
-        skewY: 3,
-        boxShadow: '0px 0px 10px white',
+        scale: 1.2,
+        rotation: -0.4,
+        skewY: 4,
         yoyo: true,
         repeat: 1,
         ease: Quad.easeInOut

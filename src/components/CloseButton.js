@@ -47,6 +47,7 @@ export default class CloseButton extends React.Component {
 
       gsap.to('#inner', {
         duration: 0.5,
+        delay: 0.3,
         morphSVG: '#inner',
         ease: Bounce.easeOut
       })
