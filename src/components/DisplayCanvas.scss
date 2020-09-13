@@ -111,7 +111,7 @@
           box-shadow: inset 0px 0px 5px rgba(#59069a, 0.6), 0px 0px 20px rgba(#2cd8fe, 0.6);
         }
 
-        .button-full {
+        .button-large {
           width: 100%;
           padding-top: 40px;
           padding-bottom: 40px;
@@ -127,8 +127,8 @@
           align-items: center;
         }
 
-        .button-small, input {
-          width: 49%;
+        .button-small, .button-medium {
+
           background: transparent;
           color: #fafafa;
           font-size: 12px;
@@ -139,9 +139,25 @@
           outline: none;
         }
 
+        .button-small {
+          width: 48.5%;
+        }
+
+        .button-medium {
+          width: 100%;
+        }
+
         input {
+          width: 100%;
+          background: transparent;
+          color: #fafafa;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          border: 1px solid;
+          border-color: #a6e000;
+          outline: none;
           background: linear-gradient(42deg, rgba(#2c024d, 0.2), rgba(#e6008c, 0.2));
-          font-size: 8px;
         }
       }
     }

@@ -169,7 +169,7 @@ export default class DisplayCanvas extends React.Component {
 
     let borderColor = colors[Math.floor(Math.random() * colors.length)]
 
-    gsap.set('.button-small, input', {
+    gsap.set('.button-small, .button-medium,  input', {
       borderColor: borderColor
     })
   }
@@ -349,15 +349,17 @@ export default class DisplayCanvas extends React.Component {
               <h1>VECTOR<b>FORGE</b></h1>
             </div>
             <div className="row">
-              <button onClick={this.onGenerateButtonClick.bind(this)} className="button-full">Generate</button>
+              <button onClick={this.onGenerateButtonClick.bind(this)} className="button-large">Generate</button>
             </div>
             <div className="row">
               <button onClick={this.onSaveButtonClick.bind(this)} className="button-small">Save</button>
               <button onClick={this.onDownloadButtonClick.bind(this)} className="button-small">Download</button>
             </div>
             <div className="row">
-              <button onClick={this.onLoadButtonClick.bind(this)} className="button-small">Load</button>
               <input type="search" id="imageID" name="imageID"></input>
+            </div>
+            <div className="row">
+              <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">Load</button>
             </div>
             <Logo />
           </div>
