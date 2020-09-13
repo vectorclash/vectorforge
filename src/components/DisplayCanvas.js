@@ -81,7 +81,12 @@ export default class DisplayCanvas extends React.Component {
     this.canvas.width = this.props.width
     this.canvas.height = this.props.height
 
-    this.mount.style.backgroundImage = 'none'
+    let imageElement = this.mount.querySelector('.image')
+    gsap.to(imageElement, {
+      duration: 0.2,
+      alpha: 0,
+      ease: Quad.easeInOut
+    })
   }
 
   buildImage() {
@@ -211,7 +216,14 @@ export default class DisplayCanvas extends React.Component {
 
   setImage(blob) {
     let url = URL.createObjectURL(blob)
-    this.mount.style.backgroundImage = 'url(' + url + ')'
+    let imageElement = this.mount.querySelector('.image')
+    imageElement.style.backgroundImage = 'url(' + url + ')'
+
+    gsap.to(imageElement, {
+      duration: 0.5,
+      alpha: 1,
+      ease: Quad.easeInOut
+    })
 
     this.setState({
       isLoading: false
@@ -350,6 +362,7 @@ export default class DisplayCanvas extends React.Component {
             <Logo />
           </div>
         </div>
+        <div className="image"></div>
       </div>
     )
   }
