@@ -106,6 +106,14 @@ export default class DisplayCanvas extends React.Component {
       this.mainConfig.geometryConfig = geometryConfig
     }
 
+    let overlayChance = Math.random()
+
+    if(overlayChance >= 0.8) {
+      this.mainConfig.overlayBlend = 'hue'
+      let overlayConfig = new GenerateLinearGradient(this.props.width, this.props.height, Math.round(Math.random() * 2))
+      this.mainConfig.overlayConfig = overlayConfig
+    }
+
     this.buildImage(this.mainConfig)
   }
 
@@ -134,6 +142,13 @@ export default class DisplayCanvas extends React.Component {
 
       let geometry = new GeometricShape(config.geometryConfig, createjs)
       this.context.drawImage(geometry, 0, 0)
+    }
+
+    if(config.overlayConfig) {
+      this.context.globalCompositeOperation = config.overlayBlend
+
+      let gradientOverlay = new LinearGradient(config.overlayConfig)
+      this.context.drawImage(gradientOverlay, 0, 0)
     }
 
     this.canvas.toBlob(this.setImage.bind(this), 'image/jpeg', 0.95)
@@ -336,7 +351,7 @@ export default class DisplayCanvas extends React.Component {
           <CloseButton isOpen={controlsAreOpen} />
         </div>
         <div className="controls-container">
-          <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div>
+          {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div> : ''}
           <div className="controls-inner">
             <div className="row">
               <button onClick={this.onGenerateButtonClick.bind(this)} className="button-large">Generate</button>
