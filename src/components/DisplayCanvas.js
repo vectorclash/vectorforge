@@ -61,6 +61,8 @@ export default class DisplayCanvas extends React.Component {
       })
       this.onCloseButtonClick()
       this.loadImageFromAirtable(id)
+    } else {
+      this.onGenerateButtonClick()
     }
   }
 
@@ -78,7 +80,7 @@ export default class DisplayCanvas extends React.Component {
     this.setState({
       activeImage: FileName()
     })
-    
+
     this.mainConfig = {}
     this.mainConfig.width = this.props.width
     this.mainConfig.height = this.props.height
@@ -233,7 +235,6 @@ export default class DisplayCanvas extends React.Component {
       this.setState({
         isLoading: true
       })
-      this.onCloseButtonClick()
       this.loadImageFromAirtable(imageIDField.value)
     } else {
       gsap.to('input', {
@@ -275,7 +276,7 @@ export default class DisplayCanvas extends React.Component {
 
     let imageIDField = document.querySelector('#imageID')
     imageIDField.value = ''
-    this.onCloseButtonClick()
+    // this.onCloseButtonClick()
     this.buildConfig()
   }
 
