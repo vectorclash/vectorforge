@@ -7,7 +7,6 @@ import saveAs from 'file-saver'
 
 import './DisplayCanvas.scss'
 
-import Logo from './Logo'
 import HexagonLoader from './HexagonLoader'
 import CloseButton from './CloseButton'
 import LinearGradient from './Canvas/LinearGradient'
@@ -72,12 +71,7 @@ export default class DisplayCanvas extends React.Component {
     this.canvas.width = this.props.width
     this.canvas.height = this.props.height
 
-    let imageElement = this.mount.querySelector('.image')
-    gsap.to(imageElement, {
-      duration: 0.2,
-      alpha: 0,
-      ease: Quad.easeInOut
-    })
+    document.body.style.backgroundImage = ''
   }
 
   buildImage() {
@@ -115,7 +109,7 @@ export default class DisplayCanvas extends React.Component {
 
     let geometryChance = Math.random()
 
-    if(geometryChance >= 0) {
+    if(geometryChance >= 0.6) {
       this.mainConfig.thirdBlend = this.randomBlendMode()
       this.context.globalCompositeOperation = this.mainConfig.thirdBlend
 
@@ -226,14 +220,8 @@ export default class DisplayCanvas extends React.Component {
 
   setImage(blob) {
     let url = URL.createObjectURL(blob)
-    let imageElement = this.mount.querySelector('.image')
-    imageElement.style.backgroundImage = 'url(' + url + ')'
 
-    gsap.to(imageElement, {
-      duration: 0.5,
-      alpha: 1,
-      ease: Quad.easeInOut
-    })
+    document.body.style.backgroundImage = 'url(' + url + ')'
 
     this.setState({
       isLoading: false
@@ -269,9 +257,10 @@ export default class DisplayCanvas extends React.Component {
     } else {
       gsap.to('input', {
         duration: 0.1,
-        scale: 1.2,
+        scaleX: 1.2,
+        scaleY: 1.4,
         rotation: -0.5 + Math.random() * 1,
-        skewY: 5 + Math.random() * 10,
+        skewY: -5 + Math.random() * 10,
         ease: Bounce.easeOut
       })
 
@@ -374,9 +363,6 @@ export default class DisplayCanvas extends React.Component {
           <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div>
           <div className="controls-inner">
             <div className="row">
-              <h1>VECTOR<b>FORGE</b></h1>
-            </div>
-            <div className="row">
               <button onClick={this.onGenerateButtonClick.bind(this)} className="button-large">Generate</button>
             </div>
             <div className="row">
@@ -389,10 +375,11 @@ export default class DisplayCanvas extends React.Component {
             <div className="row">
               <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">Load</button>
             </div>
-            <Logo />
+            <div className="row">
+              <h1>VECTOR<b>FORGE</b></h1>
+            </div>
           </div>
         </div>
-        <div className="image"></div>
       </div>
     )
   }

@@ -8,8 +8,8 @@ export default class GenerateGeometricShape {
       shapes: []
     }
 
-    this.shapeVertices = 12
-    this.shapeDepth = 23
+    this.shapeVertices = 3 + Math.round(Math.random() * 21)
+    this.shapeDepth = 2 + Math.round(Math.random() * 8)
     this.shapeAng = 360/this.shapeVertices
     this.shapeSize = Math.round(Math.random() * width * height / (height * 3))
 
