@@ -8,10 +8,8 @@ export default class CloseButton extends React.Component {
     gsap.registerPlugin(MorphSVGPlugin)
     MorphSVGPlugin.convertToPath('#lineOne, #lineTwo, #outer, #inner')
 
-    gsap.to('#outer, #inner', {
-      duration: 0.5,
-      morphSVG: '#dot-EX',
-      ease: Bounce.easeOut
+    gsap.set('#outer, #inner', {
+      morphSVG: '#dot-EX'
     })
   }
 

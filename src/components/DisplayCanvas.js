@@ -74,59 +74,40 @@ export default class DisplayCanvas extends React.Component {
     document.body.style.backgroundImage = ''
   }
 
-  buildImage() {
-    this.setCanvas()
-
+  buildConfig() {
+    this.setState({
+      activeImage: FileName()
+    })
+    
     this.mainConfig = {}
     this.mainConfig.width = this.props.width
     this.mainConfig.height = this.props.height
 
     let gradientBackgroundConfig = new GenerateLinearGradient(this.props.width, this.props.height, 1)
     this.mainConfig.gradientBackgroundConfig = gradientBackgroundConfig
-    let gradientBackground = new LinearGradient(gradientBackgroundConfig)
-    this.context.drawImage(gradientBackground, 0, 0)
-
-    // change buttons to match backgroundImage
-    this.changeGradient(gradientBackgroundConfig.colors)
-    //
 
     this.mainConfig.firstBlend = this.randomBlendMode()
-    this.context.globalCompositeOperation = this.mainConfig.firstBlend
 
     let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height)
     this.mainConfig.radialFieldConfig = radialFieldConfig
-    let radialField = new LargeRadialField(radialFieldConfig)
-    this.context.drawImage(radialField, 0, 0)
+
+    this.mainConfig.secondBlend = this.randomBlendMode()
 
     let starFieldConfig = new GenerateStarField(this.props.width, this.props.height)
     this.mainConfig.starFieldConfig = starFieldConfig
-
-    this.mainConfig.secondBlend = this.randomBlendMode()
-    this.context.globalCompositeOperation = this.mainConfig.secondBlend
-
-    let starField = new StarField(starFieldConfig, this.queue)
-    this.context.drawImage(starField, 0, 0)
 
     let geometryChance = Math.random()
 
     if(geometryChance >= 0.6) {
       this.mainConfig.thirdBlend = this.randomBlendMode()
-      this.context.globalCompositeOperation = this.mainConfig.thirdBlend
-
       let geometryConfig = new GenerateGeometricShape(this.props.width, this.props.height, 10 + Math.round(Math.random() * 30))
       this.mainConfig.geometryConfig = geometryConfig
-      let geometry = new GeometricShape(geometryConfig, createjs)
-      this.context.drawImage(geometry, 0, 0)
     }
 
-    this.setState({
-      activeImage: FileName()
-    })
-
-    this.canvas.toBlob(this.setImage.bind(this))
+    this.buildImage(this.mainConfig)
   }
 
-  rebuildImage(config) {
+  buildImage(config) {
     this.setCanvas()
 
     let gradientBackground = new LinearGradient(config.gradientBackgroundConfig)
@@ -153,7 +134,7 @@ export default class DisplayCanvas extends React.Component {
       this.context.drawImage(geometry, 0, 0)
     }
 
-    this.canvas.toBlob(this.setImage.bind(this))
+    this.canvas.toBlob(this.setImage.bind(this), 'image/jpeg', 0.95)
   }
 
   changeGradient(colors) {
@@ -213,7 +194,7 @@ export default class DisplayCanvas extends React.Component {
         this.setState({
           activeImage: id
         })
-        this.rebuildImage(JSON.parse(records[0].fields.Configuration))
+        this.buildImage(JSON.parse(records[0].fields.Configuration))
       }
     }.bind(this))
   }
@@ -282,14 +263,8 @@ export default class DisplayCanvas extends React.Component {
   }
 
   onDownloadButtonClick(e) {
-    if(!this.state.activeImage) {
-      this.setState({
-        activeImage: FileName()
-      })
-    }
-
     this.canvas.toBlob(function(blob) {
-      saveAs(blob, this.state.activeImage + '.png')
+      saveAs(blob, this.state.activeImage + '.jpg')
     }.bind(this))
   }
 
@@ -301,7 +276,7 @@ export default class DisplayCanvas extends React.Component {
     let imageIDField = document.querySelector('#imageID')
     imageIDField.value = ''
     this.onCloseButtonClick()
-    this.buildImage()
+    this.buildConfig()
   }
 
   onCloseButtonClick(e) {
