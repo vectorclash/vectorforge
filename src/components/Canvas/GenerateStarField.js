@@ -17,9 +17,9 @@ export default class GenerateStarField {
     let xlStarSizeMin = width / 30
 
     for (let i = 0; i < 5; i++) {
-      let ranSize = xlStarSizeMin + Math.random() * xlStarSizeMax
-      let ranX = -100 + Math.random() * width + 100
-      let ranY = -100 + Math.random() * height + 100
+      let ranSize = Math.round(xlStarSizeMin + Math.random() * xlStarSizeMax)
+      let ranX = Math.round(-100 + Math.random() * width + 100)
+      let ranY = Math.round(-100 + Math.random() * height + 100)
 
       let star = {
         x: ranX,
@@ -35,9 +35,9 @@ export default class GenerateStarField {
     let largeStarSizeMin = width / 200
 
     for (let i = 0; i < 50; i++) {
-      let ranSize = largeStarSizeMin + Math.random() * largeStarSizeMax
-      let ranX = -100 + Math.random() * width + 100
-      let ranY = -100 + Math.random() * height + 100
+      let ranSize = Math.round(largeStarSizeMin + Math.random() * largeStarSizeMax)
+      let ranX = Math.round(-100 + Math.random() * width + 100)
+      let ranY = Math.round(-100 + Math.random() * height + 100)
 
       let star = {
         x: ranX,
@@ -53,9 +53,9 @@ export default class GenerateStarField {
     let mediumStarSizeMin = width / 3000
 
     for (let i = 0; i < 200; i++) {
-      let ranSize = mediumStarSizeMin + Math.random() * mediumStarSizeMax
-      let ranX = -100 + Math.random() * width + 100
-      let ranY = -100 + Math.random() * height + 100
+      let ranSize = Math.round(mediumStarSizeMin + Math.random() * mediumStarSizeMax)
+      let ranX = Math.round(-100 + Math.random() * width + 100)
+      let ranY = Math.round(-100 + Math.random() * height + 100)
 
       let star = {
         x: ranX,
@@ -73,9 +73,9 @@ export default class GenerateStarField {
     if(smallStarChance < 0.7) {
       smallStarAmount = 5000
     } else if(smallStarChance > 0.7 && smallStarChance < 0.9) {
-      smallStarAmount = 50 + Math.random() * 200
+      smallStarAmount = Math.round(50 + Math.random() * 200)
     } else {
-      smallStarAmount = 5000 + Math.random() * 100000
+      smallStarAmount = Math.round(5000 + Math.random() * 100000)
     }
 
     config.smallStarAmount = smallStarAmount

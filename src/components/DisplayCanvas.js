@@ -1,7 +1,7 @@
 import React from 'react'
 import createjs from 'preload-js'
 import Airtable from 'airtable'
-import {gsap, Quad, Back} from 'gsap'
+import {gsap, Quad, Back, Bounce} from 'gsap'
 import tinycolor from 'tinycolor2'
 import saveAs from 'file-saver'
 
@@ -16,6 +16,8 @@ import LargeRadialField from './Canvas/LargeRadialField'
 import GenerateLargeRadialField from './Canvas/GenerateLargeRadialField'
 import GenerateStarField from './Canvas/GenerateStarField'
 import StarField from './Canvas/StarField'
+import GenerateGeometricShape from './Canvas/GenerateGeometricShape'
+import GeometricShape from './Canvas/GeometricShape'
 import FileName from './FileNameGenerator'
 
 import s1 from '../assets/images/star-sprite-large.png'
@@ -51,17 +53,6 @@ export default class DisplayCanvas extends React.Component {
 
   init() {
     this.setCanvas()
-
-    this.blendModes = [
-      'screen',
-      'overlay',
-      'multiply',
-      'hard-light',
-      'lighten',
-      'darken',
-      'soft-light',
-      'source-over'
-    ]
 
     const urlParams = new URLSearchParams(window.location.search)
     const id = urlParams.get('id')
@@ -122,6 +113,18 @@ export default class DisplayCanvas extends React.Component {
     let starField = new StarField(starFieldConfig, this.queue)
     this.context.drawImage(starField, 0, 0)
 
+    let geometryChance = Math.random()
+
+    if(geometryChance >= 0) {
+      this.mainConfig.thirdBlend = this.randomBlendMode()
+      this.context.globalCompositeOperation = this.mainConfig.thirdBlend
+
+      let geometryConfig = new GenerateGeometricShape(this.props.width, this.props.height, 10 + Math.round(Math.random() * 30))
+      this.mainConfig.geometryConfig = geometryConfig
+      let geometry = new GeometricShape(geometryConfig, createjs)
+      this.context.drawImage(geometry, 0, 0)
+    }
+
     this.setState({
       activeImage: FileName()
     })
@@ -149,6 +152,13 @@ export default class DisplayCanvas extends React.Component {
     let starField = new StarField(config.starFieldConfig, this.queue)
     this.context.drawImage(starField, 0, 0)
 
+    if(config.geometryConfig) {
+      this.context.globalCompositeOperation = config.thirdBlend
+
+      let geometry = new GeometricShape(config.geometryConfig, createjs)
+      this.context.drawImage(geometry, 0, 0)
+    }
+
     this.canvas.toBlob(this.setImage.bind(this))
   }
 
@@ -162,7 +172,7 @@ export default class DisplayCanvas extends React.Component {
       buttonColor = '#FAFAFA'
     }
 
-    gsap.set('.button-full', {
+    gsap.set('.button-large', {
       backgroundImage: buttonGradient,
       color: buttonColor
     })
@@ -231,8 +241,19 @@ export default class DisplayCanvas extends React.Component {
   }
 
   randomBlendMode() {
-    let randomBlendMode = Math.floor(Math.random() * this.blendModes.length)
-    return this.blendModes[randomBlendMode]
+    const blendModes = [
+      'screen',
+      'overlay',
+      'multiply',
+      'hard-light',
+      'lighten',
+      'darken',
+      'soft-light',
+      'source-over'
+    ]
+
+    let randomBlendMode = Math.floor(Math.random() * blendModes.length)
+    return blendModes[randomBlendMode]
   }
 
   // event handlers
@@ -249,11 +270,18 @@ export default class DisplayCanvas extends React.Component {
       gsap.to('input', {
         duration: 0.1,
         scale: 1.2,
-        rotation: -0.4,
-        skewY: 4,
-        yoyo: true,
-        repeat: 1,
-        ease: Quad.easeInOut
+        rotation: -0.5 + Math.random() * 1,
+        skewY: 5 + Math.random() * 10,
+        ease: Bounce.easeOut
+      })
+
+      gsap.to('input', {
+        duration: 0.1,
+        scale: 1,
+        rotation: 0,
+        skewY: 0,
+        ease: Bounce.easeOut,
+        delay: 0.1
       })
     }
   }

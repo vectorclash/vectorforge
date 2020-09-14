@@ -1,6 +1,6 @@
 import tinycolor from 'tinycolor2'
 
-export default class LinearGradient {
+export default class GenerateLinearGradient {
   constructor(width, height, complexity = 0) {
     let config = {}
 
@@ -13,15 +13,15 @@ export default class LinearGradient {
     if(ranDirection > 0.5) {
       config.gradientDirection = {
         x1: 0,
-        y1: Math.random() * height,
+        y1: Math.round(Math.random() * height),
         x2: width,
-        y2: Math.random() * height
+        y2: Math.round(Math.random() * height)
       }
     } else {
       config.gradientDirection = {
-        x1: Math.random() * width,
+        x1: Math.round(Math.random() * width),
         y1: 0,
-        x2: Math.random() * width,
+        x2: Math.round(Math.random() * width),
         y2: height
       }
     }
