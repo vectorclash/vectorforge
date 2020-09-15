@@ -121,6 +121,7 @@ export default class DisplayCanvas extends React.Component {
 
     let gradientBackground = new LinearGradient(config.gradientBackgroundConfig)
     context.drawImage(gradientBackground, 0, 0)
+    this.clearElement(gradientBackground)
 
     // change buttons to match backgroundImage
     this.changeGradient(config.gradientBackgroundConfig.colors)
@@ -130,17 +131,20 @@ export default class DisplayCanvas extends React.Component {
 
     let radialField = new LargeRadialField(config.radialFieldConfig)
     context.drawImage(radialField, 0, 0)
+    this.clearElement(radialField)
 
     context.globalCompositeOperation = config.secondBlend
 
     let starField = new StarField(config.starFieldConfig, this.queue)
     context.drawImage(starField, 0, 0)
+    this.clearElement(starField)
 
     if(config.geometryConfig) {
       context.globalCompositeOperation = config.thirdBlend
 
       let geometry = new GeometricShape(config.geometryConfig)
       context.drawImage(geometry, 0, 0)
+      this.clearElement(geometry)
     }
 
     if(config.overlayConfig) {
@@ -148,12 +152,18 @@ export default class DisplayCanvas extends React.Component {
 
       let gradientOverlay = new LinearGradient(config.overlayConfig)
       context.drawImage(gradientOverlay, 0, 0)
+      this.clearElement(gradientOverlay)
     }
 
     canvas.toBlob(this.setImage.bind(this), 'image/jpeg', 0.95)
 
-    canvas.width = 0
-    canvas.height = 0
+    this.clearElement(canvas)
+  }
+
+  clearElement(element) {
+    element.width = 0
+    element.height = 0
+    element = null
   }
 
   changeGradient(colors) {
