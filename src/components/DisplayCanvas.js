@@ -27,6 +27,7 @@ export default class DisplayCanvas extends React.Component {
     this.state = {
       generateDisabled: false,
       isLoading: false,
+      isSaved: false,
       controlsAreOpen: true,
       activeImage: ''
     }
@@ -189,6 +190,9 @@ export default class DisplayCanvas extends React.Component {
       }
     ], function(err, records) {
       if (err) {
+        this.setState({
+          isSaved: false
+        })
         console.error(err)
         return
       }
@@ -282,7 +286,12 @@ export default class DisplayCanvas extends React.Component {
   }
 
   onSaveButtonClick(e) {
-    if(this.mainConfig) {
+    const {isSaved} = this.state
+
+    if(this.mainConfig && !isSaved) {
+      this.setState({
+        isSaved: true
+      })
       this.saveImageToAirtable()
     }
   }
