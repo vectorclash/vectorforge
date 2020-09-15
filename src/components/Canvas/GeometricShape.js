@@ -1,12 +1,10 @@
 export default class GeometricShape {
-  constructor(config, createjs) {
-    this.createjs = createjs
-
+  constructor(config) {
     let canvas = document.createElement('canvas')
     canvas.width = config.width
     canvas.height = config.height
 
-    let container = new this.createjs.Stage(canvas)
+    let container = new window.createjs.Stage(canvas)
     container.x = config.width / 2
     container.y = config.height / 2
     container.rotation = 90
@@ -21,7 +19,7 @@ export default class GeometricShape {
   }
 
   buildShape(shapeConfig) {
-    let fill = new this.createjs.Shape()
+    let fill = new window.createjs.Shape()
 
     fill.graphics.beginLinearGradientFill(
       [

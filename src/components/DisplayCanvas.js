@@ -1,5 +1,4 @@
 import React from 'react'
-import createjs from 'preload-js'
 import Airtable from 'airtable'
 import {gsap, Quad, Back, Bounce} from 'gsap'
 import tinycolor from 'tinycolor2'
@@ -26,6 +25,7 @@ export default class DisplayCanvas extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      generateDisabled: false,
       isLoading: false,
       controlsAreOpen: true,
       activeImage: ''
@@ -45,14 +45,12 @@ export default class DisplayCanvas extends React.Component {
       {id: 'star-small', src: s2}
     ]
 
-    this.queue = new createjs.LoadQueue(true, '')
+    this.queue = new window.createjs.LoadQueue(true, '')
     this.queue.on('complete', this.init, this)
     this.queue.loadManifest(queueItems)
   }
 
   init() {
-    this.setCanvas()
-
     const urlParams = new URLSearchParams(window.location.search)
     const id = urlParams.get('id')
     if(id) {
@@ -64,16 +62,6 @@ export default class DisplayCanvas extends React.Component {
     } else {
       this.onGenerateButtonClick()
     }
-  }
-
-  setCanvas() {
-    this.canvas = document.createElement('canvas')
-    this.context = this.canvas.getContext('2d')
-
-    this.canvas.width = this.props.width
-    this.canvas.height = this.props.height
-
-    document.body.style.backgroundImage = ''
   }
 
   buildConfig() {
@@ -118,40 +106,53 @@ export default class DisplayCanvas extends React.Component {
   }
 
   buildImage(config) {
-    this.setCanvas()
+    document.body.style.backgroundImage = ''
+
+    let canvas = document.createElement('canvas')
+    let context = canvas.getContext('2d')
+
+    canvas.width = this.props.width
+    canvas.height = this.props.height
+
+    this.setState({
+      generateDisabled: true
+    })
 
     let gradientBackground = new LinearGradient(config.gradientBackgroundConfig)
-    this.context.drawImage(gradientBackground, 0, 0)
+    context.drawImage(gradientBackground, 0, 0)
 
     // change buttons to match backgroundImage
     this.changeGradient(config.gradientBackgroundConfig.colors)
     //
 
-    this.context.globalCompositeOperation = config.firstBlend
+    context.globalCompositeOperation = config.firstBlend
 
     let radialField = new LargeRadialField(config.radialFieldConfig)
-    this.context.drawImage(radialField, 0, 0)
+    context.drawImage(radialField, 0, 0)
 
-    this.context.globalCompositeOperation = config.secondBlend
+    context.globalCompositeOperation = config.secondBlend
 
     let starField = new StarField(config.starFieldConfig, this.queue)
-    this.context.drawImage(starField, 0, 0)
+    context.drawImage(starField, 0, 0)
 
     if(config.geometryConfig) {
-      this.context.globalCompositeOperation = config.thirdBlend
+      context.globalCompositeOperation = config.thirdBlend
 
-      let geometry = new GeometricShape(config.geometryConfig, createjs)
-      this.context.drawImage(geometry, 0, 0)
+      let geometry = new GeometricShape(config.geometryConfig)
+      context.drawImage(geometry, 0, 0)
     }
 
     if(config.overlayConfig) {
-      this.context.globalCompositeOperation = config.overlayBlend
+      context.globalCompositeOperation = config.overlayBlend
 
       let gradientOverlay = new LinearGradient(config.overlayConfig)
-      this.context.drawImage(gradientOverlay, 0, 0)
+      context.drawImage(gradientOverlay, 0, 0)
     }
 
-    this.canvas.toBlob(this.setImage.bind(this), 'image/jpeg', 0.95)
+    canvas.toBlob(this.setImage.bind(this), 'image/jpeg', 0.95)
+
+    canvas.width = 0
+    canvas.height = 0
   }
 
   changeGradient(colors) {
@@ -217,12 +218,20 @@ export default class DisplayCanvas extends React.Component {
   }
 
   setImage(blob) {
+    this.blob = blob
     let url = URL.createObjectURL(blob)
+    let imageLoader = document.createElement('img')
+    imageLoader.src = url
 
-    document.body.style.backgroundImage = 'url(' + url + ')'
+    imageLoader.addEventListener('load', () => {
+      gsap.delayedCall(1, () => {
+        document.body.style.backgroundImage = 'url(' + url + ')'
 
-    this.setState({
-      isLoading: false
+        this.setState({
+          generateDisabled: false,
+          isLoading: false
+        })
+      })
     })
   }
 
@@ -279,20 +288,24 @@ export default class DisplayCanvas extends React.Component {
   }
 
   onDownloadButtonClick(e) {
-    this.canvas.toBlob(function(blob) {
-      saveAs(blob, this.state.activeImage + '.jpg')
-    }.bind(this))
+    if(this.blob) {
+      saveAs(this.blob, this.state.activeImage + '.jpg')
+    }
   }
 
   onGenerateButtonClick(e) {
-    this.setState({
-      isLoading: true
-    })
+    const {generateDisabled} = this.state
 
-    let imageIDField = document.querySelector('#imageID')
-    imageIDField.value = ''
-    // this.onCloseButtonClick()
-    this.buildConfig()
+    if(!generateDisabled) {
+      this.setState({
+        isLoading: true
+      })
+
+      let imageIDField = document.querySelector('#imageID')
+      imageIDField.value = ''
+      // this.onCloseButtonClick()
+      this.buildConfig()
+    }
   }
 
   onCloseButtonClick(e) {
@@ -342,7 +355,7 @@ export default class DisplayCanvas extends React.Component {
   //
 
   render() {
-    const {isLoading, controlsAreOpen} = this.state
+    const {isLoading, controlsAreOpen, generateDisabled} = this.state
 
     return (
       <div className='display-canvas' ref={mount => {this.mount = mount}}>
@@ -354,7 +367,7 @@ export default class DisplayCanvas extends React.Component {
           {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div> : ''}
           <div className="controls-inner">
             <div className="row">
-              <button onClick={this.onGenerateButtonClick.bind(this)} className="button-large">Generate</button>
+              <button onClick={this.onGenerateButtonClick.bind(this)} className={'button-large ' + (generateDisabled ? 'disabled' : 'enabled')}>Generate</button>
             </div>
             <div className="row">
               <button onClick={this.onSaveButtonClick.bind(this)} className="button-small">Save</button>
