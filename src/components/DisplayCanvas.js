@@ -56,7 +56,8 @@ export default class DisplayCanvas extends React.Component {
     const id = urlParams.get('id')
     if(id) {
       this.setState({
-        isLoading: true
+        isLoading: true,
+        isSaved: true
       })
       this.onCloseButtonClick()
       this.loadImageFromAirtable(id)
@@ -243,7 +244,8 @@ export default class DisplayCanvas extends React.Component {
 
         this.setState({
           generateDisabled: false,
-          isLoading: false
+          isLoading: false,
+          isSaved: false
         })
       })
     })
