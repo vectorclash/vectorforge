@@ -29,6 +29,7 @@ export default class DisplayCanvas extends React.Component {
       isLoading: false,
       isSaved: false,
       controlsAreOpen: true,
+      canCloseAgain: false,
       activeImage: ''
     }
   }
@@ -351,50 +352,46 @@ export default class DisplayCanvas extends React.Component {
   onCloseButtonClick(e) {
     const {controlsAreOpen} = this.state
 
-    if(controlsAreOpen) {
-      this.setState({
-        controlsAreOpen: false
-      })
+    if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+      if(controlsAreOpen) {
+        this.setState({
+          controlsAreOpen: false
+        })
 
-      gsap.to('.controls-container', {
-        duration: 0.3,
-        alpha: 0,
-        ease: Quad.easeInOut,
-        onComplete: () => {
-          gsap.set('.controls-container', {
-            display: 'none'
-          })
-        }
-      })
-    } else {
-      this.setState({
-        controlsAreOpen: true
-      })
+        gsap.to('.controls-container', {
+          duration: 0.3,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onComplete: () => {
+            gsap.set('.controls-container', {
+              display: 'none'
+            })
+          }
+        })
+      } else {
+        this.setState({
+          controlsAreOpen: true
+        })
 
-      gsap.to('.controls-container', {
-        duration: 0.3,
-        alpha: 1,
-        ease: Quad.easeInOut,
-        onStart: () => {
-          gsap.set('.controls-container', {
-            display: 'flex'
-          })
-        }
-      })
+        gsap.to('.controls-container', {
+          duration: 0.3,
+          alpha: 1,
+          ease: Quad.easeInOut,
+          onStart: () => {
+            gsap.set('.controls-container', {
+              display: 'flex'
+            })
+          }
+        })
 
-      gsap.from('.row, .logo', {
-        duration: 0.5,
-        alpha: 0,
-        y: 42,
-        stagger: 0.05,
-        ease: Back.easeOut
-      })
-    }
-  }
-
-  onTouch(e) {
-    if(e.target.className === 'controls-inner') {
-      this.onCloseButtonClick()
+        gsap.from('.row, .logo', {
+          duration: 0.5,
+          alpha: 0,
+          y: 42,
+          stagger: 0.05,
+          ease: Back.easeOut
+        })
+      }
     }
   }
 
@@ -409,10 +406,10 @@ export default class DisplayCanvas extends React.Component {
         <div className="controls-open" onClick={this.onCloseButtonClick.bind(this)}>
           <CloseButton isOpen={controlsAreOpen} />
         </div>
-        <div className="image-container" onTouchEnd={this.onCloseButtonClick.bind(this)}></div>
-        <div className="controls-container" onTouchStart={this.onTouch.bind(this)}>
+        <div className="image-container" onClick={this.onCloseButtonClick.bind(this)}></div>
+        <div className="controls-container">
           {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div> : ''}
-          <div className="controls-inner">
+          <div className="controls-inner" onClick={this.onCloseButtonClick.bind(this)}>
             <div className="row">
               <button onClick={this.onGenerateButtonClick.bind(this)} className={'button-large ' + (generateDisabled ? 'disabled' : 'enabled')}>Generate</button>
             </div>
