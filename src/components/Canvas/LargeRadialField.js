@@ -11,6 +11,8 @@ export default class LargeRadialField {
     for (let i = 0; i < config.radGradients.length; i++) {
       context.globalCompositeOperation = 'overlay'
 
+      context.globalAlpha = config.radGradients[i].alpha
+
       let radGrad = new RadialGradient(
         config.radGradSize,
         config.radGradSize,

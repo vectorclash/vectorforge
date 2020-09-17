@@ -14,6 +14,7 @@ export default class GenerateLargeRadialField {
 
     for (let i = 0; i < amount; i++) {
       let radGrad = {}
+      radGrad.alpha = (Math.random()).toFixed(2)
       radGrad.size = Math.round(config.radGradSize / 2 + Math.random() * config.radGradSize * 4)
       radGrad.x = Math.round(-(radGrad.size) + Math.random() * width + (radGrad.size / 2))
       radGrad.y = Math.round(-(radGrad.size) + Math.random() * height + (radGrad.size / 2))

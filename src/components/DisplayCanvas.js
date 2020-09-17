@@ -78,10 +78,14 @@ export default class DisplayCanvas extends React.Component {
     let gradientBackgroundConfig = new GenerateLinearGradient(this.props.width, this.props.height, 1)
     this.mainConfig.gradientBackgroundConfig = gradientBackgroundConfig
 
-    this.mainConfig.firstBlend = this.randomBlendMode()
+    let radialChance = Math.random()
 
-    let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height)
-    this.mainConfig.radialFieldConfig = radialFieldConfig
+    if(radialChance > 0.4) {
+      this.mainConfig.firstBlend = this.randomBlendMode()
+
+      let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height)
+      this.mainConfig.radialFieldConfig = radialFieldConfig
+    }
 
     this.mainConfig.secondBlend = this.randomBlendMode()
 
@@ -98,8 +102,9 @@ export default class DisplayCanvas extends React.Component {
 
     let overlayChance = Math.random()
 
-    if(overlayChance >= 0.8) {
-      this.mainConfig.overlayBlend = 'hue'
+    if(overlayChance >= 0) {
+      this.mainConfig.overlayBlend = this.randomBlendMode()
+      this.mainConfig.overlayAlpha = (Math.random()).toFixed(2)
       let overlayConfig = new GenerateLinearGradient(this.props.width, this.props.height, Math.round(Math.random() * 2))
       this.mainConfig.overlayConfig = overlayConfig
     }
@@ -108,7 +113,11 @@ export default class DisplayCanvas extends React.Component {
   }
 
   buildImage(config) {
-    document.body.style.backgroundImage = ''
+    gsap.to('.image-container', {
+      duration: 0.2,
+      alpha: 0,
+      ease: Quad.easeInOut
+    })
 
     let canvas = document.createElement('canvas')
     let context = canvas.getContext('2d')
@@ -128,11 +137,13 @@ export default class DisplayCanvas extends React.Component {
     this.changeGradient(config.gradientBackgroundConfig.colors)
     //
 
-    context.globalCompositeOperation = config.firstBlend
+    if(config.radialFieldConfig) {
+      context.globalCompositeOperation = config.firstBlend
 
-    let radialField = new LargeRadialField(config.radialFieldConfig)
-    context.drawImage(radialField, 0, 0)
-    this.clearElement(radialField)
+      let radialField = new LargeRadialField(config.radialFieldConfig)
+      context.drawImage(radialField, 0, 0)
+      this.clearElement(radialField)
+    }
 
     context.globalCompositeOperation = config.secondBlend
 
@@ -150,6 +161,7 @@ export default class DisplayCanvas extends React.Component {
 
     if(config.overlayConfig) {
       context.globalCompositeOperation = config.overlayBlend
+      context.globalAlpha = config.overlayAlpha
 
       let gradientOverlay = new LinearGradient(config.overlayConfig)
       context.drawImage(gradientOverlay, 0, 0)
@@ -240,7 +252,14 @@ export default class DisplayCanvas extends React.Component {
 
     imageLoader.addEventListener('load', () => {
       gsap.delayedCall(1, () => {
-        document.body.style.backgroundImage = 'url(' + url + ')'
+        let imageContainer = document.querySelector('.image-container')
+        imageContainer.style.backgroundImage = 'url(' + url + ')'
+
+        gsap.to('.image-container', {
+          duration: 0.2,
+          alpha: 1,
+          ease: Quad.easeInOut
+        })
 
         this.setState({
           generateDisabled: false,
@@ -379,13 +398,14 @@ export default class DisplayCanvas extends React.Component {
     const {isLoading, controlsAreOpen, generateDisabled} = this.state
 
     return (
-      <div className='display-canvas' ref={mount => {this.mount = mount}}>
+      <div className="display-canvas" ref={mount => {this.mount = mount}}>
         {isLoading ? <HexagonLoader /> : ''}
         <div className="controls-open" onClick={this.onCloseButtonClick.bind(this)}>
           <CloseButton isOpen={controlsAreOpen} />
         </div>
+        <div className="image-container"></div>
         <div className="controls-container">
-          {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div> : ''}
+          {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)} onTouchStart={this.onCloseButtonClick.bind(this)}></div> : ''}
           <div className="controls-inner">
             <div className="row">
               <button onClick={this.onGenerateButtonClick.bind(this)} className={'button-large ' + (generateDisabled ? 'disabled' : 'enabled')}>Generate</button>
