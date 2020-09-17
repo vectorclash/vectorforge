@@ -392,6 +392,12 @@ export default class DisplayCanvas extends React.Component {
     }
   }
 
+  onTouch(e) {
+    if(e.target.className === 'controls-inner') {
+      this.onCloseButtonClick()
+    }
+  }
+
   //
 
   render() {
@@ -403,9 +409,9 @@ export default class DisplayCanvas extends React.Component {
         <div className="controls-open" onClick={this.onCloseButtonClick.bind(this)}>
           <CloseButton isOpen={controlsAreOpen} />
         </div>
-        <div className="image-container"></div>
-        <div className="controls-container">
-          {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)} onTouchStart={this.onCloseButtonClick.bind(this)}></div> : ''}
+        <div className="image-container" onTouchEnd={this.onCloseButtonClick.bind(this)}></div>
+        <div className="controls-container" onTouchStart={this.onTouch.bind(this)}>
+          {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div> : ''}
           <div className="controls-inner">
             <div className="row">
               <button onClick={this.onGenerateButtonClick.bind(this)} className={'button-large ' + (generateDisabled ? 'disabled' : 'enabled')}>Generate</button>
