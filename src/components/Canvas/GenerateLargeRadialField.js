@@ -19,10 +19,27 @@ export default class GenerateLargeRadialField {
       radGrad.x = Math.round(-(radGrad.size) + Math.random() * width + (radGrad.size / 2))
       radGrad.y = Math.round(-(radGrad.size) + Math.random() * height + (radGrad.size / 2))
       radGrad.colors = []
+
       let colorAmount = 2 + Math.round(Math.random() * 3)
-      for (let i = 0; i < colorAmount; i++) {
-        let color = tinycolor.random().toHexString()
-        radGrad.colors.push(color)
+
+      let gradientType = Math.random()
+
+      if (gradientType > 0.5) {
+        let colorStart = Math.random() * 360
+        let colorDistance = Math.random() * 50
+        for (let i = 0; i < colorAmount; i++) {
+          radGrad.colors.push(tinycolor('#CCFF00').spin(colorStart + colorDistance * i).toHexString())
+        }
+      } else {
+        let colorType = Math.random()
+
+        for (let i = 0; i < colorAmount; i++) {
+          if (colorType > 0.8) {
+            radGrad.colors.push(tinycolor.random().toHexString())
+          } else {
+            radGrad.colors.push(tinycolor('#CCFF00').spin(Math.round(Math.random() * 360)).toHexString())
+          }
+        }
       }
 
       config.radGradients.push(radGrad)
