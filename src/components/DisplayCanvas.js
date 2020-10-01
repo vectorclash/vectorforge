@@ -30,7 +30,8 @@ export default class DisplayCanvas extends React.Component {
       isSaved: false,
       controlsAreOpen: true,
       canCloseAgain: false,
-      activeImage: ''
+      activeImage: '',
+      controlsBlurred: false
     }
   }
 
@@ -347,6 +348,11 @@ export default class DisplayCanvas extends React.Component {
       // this.onCloseButtonClick()
       this.buildConfig()
     }
+
+    let colors = this.mount.querySelectorAll('.color')
+    for(let i = 0; i < colors.length; i++) {
+      console.log(colors[i].value)
+    }
   }
 
   onCloseButtonClick(e) {
@@ -395,10 +401,16 @@ export default class DisplayCanvas extends React.Component {
     }
   }
 
+  onSettingsButtonClick(e) {
+    this.setState({
+      controlsBlurred: true
+    })
+  }
+
   //
 
   render() {
-    const {isLoading, controlsAreOpen, generateDisabled} = this.state
+    const {isLoading, controlsAreOpen, generateDisabled, controlsBlurred} = this.state
 
     return (
       <div className="display-canvas" ref={mount => {this.mount = mount}}>
@@ -409,7 +421,7 @@ export default class DisplayCanvas extends React.Component {
         <div className="image-container" onClick={this.onCloseButtonClick.bind(this)}></div>
         <div className="controls-container">
           {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div> : ''}
-          <div className="controls-inner" onClick={this.onCloseButtonClick.bind(this)}>
+          <div className={'controls-inner ' + (controlsBlurred ? 'controls-blurred' : '')} onClick={this.onCloseButtonClick.bind(this)}>
             <div className="row">
               <button onClick={this.onGenerateButtonClick.bind(this)} className={'button-large ' + (generateDisabled ? 'disabled' : 'enabled')}>Generate</button>
             </div>
@@ -423,8 +435,16 @@ export default class DisplayCanvas extends React.Component {
             <div className="row">
               <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">Load</button>
             </div>
+            {/* <div className="row colors">
+              <input className="color" data-jscolor="" />
+              <input className="color" data-jscolor="" />
+              <input className="color" data-jscolor="" />
+              <input className="color" data-jscolor="" />
+              <input className="color" data-jscolor="" />
+            </div> */}
             <div className="row">
               <h1>VECTOR<b>FORGE</b></h1>
+              <button onClick={this.onSettingsButtonClick.bind(this)} className="button-small">Settings</button>
             </div>
           </div>
         </div>

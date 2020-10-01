@@ -60,6 +60,12 @@
       z-index: 0;
     }
 
+    .controls-blurred {
+      filter: blur(2px) grayscale(50%);
+      opacity: 0.4 !important;
+      transform: scale(0.9);
+    }
+
     .controls-inner {
       position: relative;
       padding: 5vh;
@@ -80,7 +86,7 @@
         h1 {
           display: block;
           width: 100%;
-          text-align: center;
+          text-align: left;
           color: #fafafa;
           font-size: 20px;
           margin-bottom: 30px;
@@ -166,6 +172,19 @@
           border-color: #a6e000;
           outline: none;
           background: linear-gradient(42deg, rgba(#2c024d, 0.2), rgba(#e6008c, 0.2));
+        }
+      }
+
+      .row.colors {
+        max-width: 400px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+
+        .color {
+          width: 48.5%;
+          height: 30px;
+          font-size: 10px;
+          background-color: rgba(0, 0, 0, 0.4);
         }
       }
     }
