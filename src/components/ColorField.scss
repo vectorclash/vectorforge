@@ -26,7 +26,6 @@
     height: 100%;
     width: 25px;
     z-index: 100;
-    display: none;
     cursor: pointer;
 
     svg {
@@ -35,11 +34,5 @@
       fill: white;
       stroke: white;
     }
-  }
-}
-
-.color-container:hover {
-  .color-close-button {
-    display: block;
   }
 }

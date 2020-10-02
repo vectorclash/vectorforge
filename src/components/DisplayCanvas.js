@@ -293,17 +293,19 @@ export default class DisplayCanvas extends React.Component {
   }
 
   animateColors() {
-    gsap.fromTo('.color-container', {
-      y: -10,
-      alpha: 0,
-    },
-    {
-      duration: 0.2,
-      y: 0,
-      alpha: 1,
-      stagger: 0.05,
-      ease: Back.easeOut
-    })
+    if(this.state.colors.length > 0) {
+      gsap.fromTo('.color-container', {
+        y: -10,
+        alpha: 0,
+      },
+      {
+        duration: 0.2,
+        y: 0,
+        alpha: 1,
+        stagger: 0.02,
+        ease: Back.easeOut
+      })
+    }
   }
 
   // event handlers
@@ -443,7 +445,7 @@ export default class DisplayCanvas extends React.Component {
 
   onSettingsCloseButtonClick(e) {
     gsap.to('#controls-main', {
-      duration: 0.1,
+      duration: 0.2,
       alpha: 0.9,
       scale: 1,
       filter: 'blur(0px)',
@@ -457,7 +459,7 @@ export default class DisplayCanvas extends React.Component {
 
   onAddColorButtonClick(e) {
     let colors = [...this.state.colors]
-    colors.push(new tinycolor('#CCFF00').spin(Math.random() * 360).toHexString())
+    colors.push(new tinycolor.random().toHexString())
     this.setState({
       colors: colors
     })

@@ -136,10 +136,6 @@
           vertical-align: middle;
         }
 
-        // .button-large.enabled {
-        //
-        // }
-
         .button-large.disabled {
           background: linear-gradient(42deg, #6c6c6c, #d1d1d1) !important;
           color: #ff007a !important;
@@ -201,6 +197,7 @@
         justify-content: space-between;
 
         .button-small {
+          position: relative;
           height: 40px;
           font-size: 10px;
           display: flex;
@@ -208,8 +205,13 @@
           align-items: center;
 
           svg {
-            margin-left: 10px;
-            height: 40%;
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            padding-right: 10px;
+            height: 100%;
+            width: 25px;
+            z-index: 100;
             fill: white;
           }
         }
