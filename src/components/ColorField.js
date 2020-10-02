@@ -1,5 +1,4 @@
 import React from 'react'
-import {gsap, Back} from 'gsap'
 import CloseColorButton from './buttons/CloseColorButton'
 
 import './ColorField.scss'
@@ -7,13 +6,6 @@ import './ColorField.scss'
 export default class ColorField extends React.Component {
   componentDidMount() {
     window.jscolor.install()
-
-    gsap.from(this.mount, {
-      duration: 0.5,
-      y: -10,
-      alpha: 0,
-      ease: Back.easeOut
-    })
   }
 
   onCloseClick(e) {

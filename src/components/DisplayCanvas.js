@@ -292,6 +292,20 @@ export default class DisplayCanvas extends React.Component {
     return blendModes[randomBlendMode]
   }
 
+  animateColors() {
+    gsap.fromTo('.color-container', {
+      y: -10,
+      alpha: 0,
+    },
+    {
+      duration: 0.2,
+      y: 0,
+      alpha: 1,
+      stagger: 0.05,
+      ease: Back.easeOut
+    })
+  }
+
   // event handlers
 
   onLoadButtonClick(e) {
@@ -412,14 +426,14 @@ export default class DisplayCanvas extends React.Component {
       alpha: 0.3,
       scale: 0.9,
       filter: 'blur(2px)',
-      ease: Quad.easeInOut
+      ease: Back.easeOut
     })
 
     gsap.from('#controls-settings', {
       duration: 0.2,
       alpha: 0,
       scale: 1.2,
-      ease: Quad.easeInOut
+      ease: Back.easeOut
     })
 
     this.setState({
@@ -433,7 +447,7 @@ export default class DisplayCanvas extends React.Component {
       alpha: 0.9,
       scale: 1,
       filter: 'blur(0px)',
-      ease: Quad.easeInOut
+      ease: Back.easeOut
     })
 
     this.setState({
@@ -446,6 +460,10 @@ export default class DisplayCanvas extends React.Component {
     colors.push(new tinycolor('#CCFF00').spin(Math.random() * 360).toHexString())
     this.setState({
       colors: colors
+    })
+
+    gsap.delayedCall(0.05, () => {
+      this.animateColors()
     })
   }
 
@@ -467,13 +485,7 @@ export default class DisplayCanvas extends React.Component {
         colors: colorArray
       })
 
-      gsap.from('.color', {
-        duration: 0.2,
-        y: -10,
-        alpha: 0,
-        stagger: 0.05,
-        ease: Back.easeOut
-      })
+      this.animateColors()
     })
   }
 
