@@ -7,16 +7,19 @@ import saveAs from 'file-saver'
 import './DisplayCanvas.scss'
 
 import HexagonLoader from './HexagonLoader'
-import CloseButton from './CloseButton'
-import LinearGradient from './Canvas/LinearGradient'
-import GenerateLinearGradient from './Canvas/GenerateLinearGradient'
-import LargeRadialField from './Canvas/LargeRadialField'
-import GenerateLargeRadialField from './Canvas/GenerateLargeRadialField'
-import GenerateStarField from './Canvas/GenerateStarField'
-import StarField from './Canvas/StarField'
-import GenerateGeometricShape from './Canvas/GenerateGeometricShape'
-import GeometricShape from './Canvas/GeometricShape'
+import CloseButton from './buttons/CloseButton'
+import LinearGradient from './canvas/LinearGradient'
+import GenerateLinearGradient from './canvas/GenerateLinearGradient'
+import LargeRadialField from './canvas/LargeRadialField'
+import GenerateLargeRadialField from './canvas/GenerateLargeRadialField'
+import GenerateStarField from './canvas/GenerateStarField'
+import StarField from './canvas/StarField'
+import GenerateGeometricShape from './canvas/GenerateGeometricShape'
+import GeometricShape from './canvas/GeometricShape'
 import FileName from './FileNameGenerator'
+import SettingsButton from './buttons/SettingsButton'
+import AddColorButton from './buttons/AddColorButton'
+import ColorField from './ColorField'
 
 import s1 from '../assets/images/star-sprite-large.png'
 import s2 from '../assets/images/star-sprite-small.png'
@@ -31,7 +34,8 @@ export default class DisplayCanvas extends React.Component {
       controlsAreOpen: true,
       canCloseAgain: false,
       activeImage: '',
-      controlsBlurred: false
+      controlsBlurred: false,
+      colors: []
     }
   }
 
@@ -357,6 +361,7 @@ export default class DisplayCanvas extends React.Component {
 
   onCloseButtonClick(e) {
     const {controlsAreOpen} = this.state
+    this.onSettingsCloseButtonClick()
 
     if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
       if(controlsAreOpen) {
@@ -402,15 +407,80 @@ export default class DisplayCanvas extends React.Component {
   }
 
   onSettingsButtonClick(e) {
+    gsap.to('#controls-main', {
+      duration: 0.2,
+      alpha: 0.3,
+      scale: 0.9,
+      filter: 'blur(2px)',
+      ease: Quad.easeInOut
+    })
+
+    gsap.from('#controls-settings', {
+      duration: 0.2,
+      alpha: 0,
+      scale: 1.2,
+      ease: Quad.easeInOut
+    })
+
     this.setState({
       controlsBlurred: true
+    })
+  }
+
+  onSettingsCloseButtonClick(e) {
+    gsap.to('#controls-main', {
+      duration: 0.1,
+      alpha: 0.9,
+      scale: 1,
+      filter: 'blur(0px)',
+      ease: Quad.easeInOut
+    })
+
+    this.setState({
+      controlsBlurred: false
+    })
+  }
+
+  onAddColorButtonClick(e) {
+    let colors = [...this.state.colors]
+    colors.push(new tinycolor('#CCFF00').spin(Math.random() * 360).toHexString())
+    this.setState({
+      colors: colors
+    })
+  }
+
+  onRemoveColorbuttonClick(color) {
+    let colorFields = document.querySelectorAll('.color')
+    let colorArray = []
+    for (let i = 0; i < colorFields.length; i++) {
+      if (colorFields[i].value !== color) {
+        colorArray.push(colorFields[i].value)
+      }
+    }
+    
+    this.setState({
+      colors: []
+    })
+
+    gsap.delayedCall(0.001, () => {
+      this.setState({
+        colors: colorArray
+      })
+
+      gsap.from('.color', {
+        duration: 0.2,
+        y: -10,
+        alpha: 0,
+        stagger: 0.05,
+        ease: Back.easeOut
+      })
     })
   }
 
   //
 
   render() {
-    const {isLoading, controlsAreOpen, generateDisabled, controlsBlurred} = this.state
+    const {isLoading, controlsAreOpen, generateDisabled, controlsBlurred, colors} = this.state
 
     return (
       <div className="display-canvas" ref={mount => {this.mount = mount}}>
@@ -420,10 +490,10 @@ export default class DisplayCanvas extends React.Component {
         </div>
         <div className="image-container" onClick={this.onCloseButtonClick.bind(this)}></div>
         <div className="controls-container">
-          {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div> : ''}
-          <div className={'controls-inner ' + (controlsBlurred ? 'controls-blurred' : '')} onClick={this.onCloseButtonClick.bind(this)}>
+          {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div> : ''} 
+          <div id="controls-main" className={'controls-inner' + (controlsBlurred ? ' controls-blurred' : '')}>
             <div className="row">
-              <button onClick={this.onGenerateButtonClick.bind(this)} className={'button-large ' + (generateDisabled ? 'disabled' : 'enabled')}>Generate</button>
+              <button onClick={this.onGenerateButtonClick.bind(this)} className={'button-large' + (generateDisabled ? ' disabled' : ' enabled')}>Generate</button>
             </div>
             <div className="row">
               <button onClick={this.onSaveButtonClick.bind(this)} className="button-small">Save</button>
@@ -435,16 +505,22 @@ export default class DisplayCanvas extends React.Component {
             <div className="row">
               <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">Load</button>
             </div>
-            {/* <div className="row colors">
-              <input className="color" data-jscolor="" />
-              <input className="color" data-jscolor="" />
-              <input className="color" data-jscolor="" />
-              <input className="color" data-jscolor="" />
-              <input className="color" data-jscolor="" />
-            </div> */}
             <div className="row">
               <h1>VECTOR<b>FORGE</b></h1>
-              <button onClick={this.onSettingsButtonClick.bind(this)} className="button-small">Settings</button>
+              <button onClick={this.onSettingsButtonClick.bind(this)} className="button-icon">
+                <SettingsButton />
+              </button>
+            </div>
+          </div>
+          <div id="controls-settings" className={'controls-inner controls-settings' + (controlsBlurred ? ' controls-visible' : '')}>
+            <div className="row colors">
+              {colors.map((color, index) => (
+                <ColorField color={color} key={index} callback={this.onRemoveColorbuttonClick.bind(this)} />
+              ))}
+              {colors.length < 6 ? <button onClick={this.onAddColorButtonClick.bind(this)} className="button-small">ADD COLOR <AddColorButton /></button> : ''}
+            </div>
+            <div className="row">
+              <button onClick={this.onSettingsCloseButtonClick.bind(this)} className="button-medium">BACK</button>
             </div>
           </div>
         </div>
