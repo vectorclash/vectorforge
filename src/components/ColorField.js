@@ -18,7 +18,7 @@ export default class ColorField extends React.Component {
         <div className="color-close-button" onClick={this.onCloseClick.bind(this)}>
           <CloseColorButton />
         </div>
-        <input className="color" data-jscolor="" defaultValue={this.props.color} />
+        <input className="color" data-jscolor="" defaultValue={this.props.color}/>
       </div>
     )
   }

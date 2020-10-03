@@ -81,7 +81,7 @@ export default class DisplayCanvas extends React.Component {
     this.mainConfig.width = this.props.width
     this.mainConfig.height = this.props.height
 
-    let gradientBackgroundConfig = new GenerateLinearGradient(this.props.width, this.props.height, 1)
+    let gradientBackgroundConfig = new GenerateLinearGradient(this.props.width, this.props.height, 1, this.state.colors)
     this.mainConfig.gradientBackgroundConfig = gradientBackgroundConfig
 
     let radialChance = Math.random()
@@ -89,7 +89,7 @@ export default class DisplayCanvas extends React.Component {
     if(radialChance > 0.4) {
       this.mainConfig.firstBlend = this.randomBlendMode()
 
-      let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height)
+      let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height, this.state.colors)
       this.mainConfig.radialFieldConfig = radialFieldConfig
     }
 
@@ -308,6 +308,18 @@ export default class DisplayCanvas extends React.Component {
     }
   }
 
+  updateColors() {
+    let colorFields = document.querySelectorAll('.color')
+    let colorArray = []
+    for (let i = 0; i < colorFields.length; i++) {
+      colorArray.push(colorFields[i].value)
+    }
+
+    this.setState({
+      colors: colorArray
+    })
+  }
+
   // event handlers
 
   onLoadButtonClick(e) {
@@ -367,11 +379,6 @@ export default class DisplayCanvas extends React.Component {
       imageIDField.value = ''
       // this.onCloseButtonClick()
       this.buildConfig()
-    }
-
-    let colors = this.mount.querySelectorAll('.color')
-    for(let i = 0; i < colors.length; i++) {
-      console.log(colors[i].value)
     }
   }
 
@@ -449,7 +456,10 @@ export default class DisplayCanvas extends React.Component {
       alpha: 0.9,
       scale: 1,
       filter: 'blur(0px)',
-      ease: Back.easeOut
+      ease: Back.easeOut,
+      onComplete: () => {
+        this.updateColors()
+      }
     })
 
     this.setState({
@@ -529,7 +539,11 @@ export default class DisplayCanvas extends React.Component {
           <div id="controls-settings" className={'controls-inner controls-settings' + (controlsBlurred ? ' controls-visible' : '')}>
             <div className="row colors">
               {colors.map((color, index) => (
-                <ColorField color={color} key={index} callback={this.onRemoveColorbuttonClick.bind(this)} />
+                <ColorField 
+                  color={color} 
+                  key={index}
+                  callback={this.onRemoveColorbuttonClick.bind(this)} 
+                />
               ))}
               {colors.length < 6 ? <button onClick={this.onAddColorButtonClick.bind(this)} className="button-small">ADD COLOR <AddColorButton /></button> : ''}
             </div>
