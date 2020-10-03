@@ -165,7 +165,22 @@
 
         .button-icon:hover {
           box-shadow: none;
-          transform: scale(1.2);
+          animation-name: icon-animate;
+          animation-duration: 0.4s;
+        }
+
+        @keyframes icon-animate {
+          0% {
+            transform: scale(1);
+          }
+
+          50% {
+            transform: scale(1.2);
+          }
+
+          100% {
+            transform: scale(1);
+          }
         }
 
         .button-small {

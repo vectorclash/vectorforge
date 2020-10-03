@@ -1,14 +1,14 @@
 import GenerateLinearGradient from './GenerateLinearGradient'
 
 export default class GenerateStarField {
-  constructor(width, height) {
+  constructor(width, height, colors = []) {
     let config = {}
 
     config.width = width
     config.height = height
 
     let gradientComplexity = Math.round(Math.random() * 4)
-    let gradientConfig = new GenerateLinearGradient(width, height, gradientComplexity)
+    let gradientConfig = new GenerateLinearGradient(width, height, gradientComplexity, colors.reverse())
     config.gradientConfig = gradientConfig
 
     let stars = []

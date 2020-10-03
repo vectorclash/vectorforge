@@ -81,7 +81,7 @@ export default class DisplayCanvas extends React.Component {
     this.mainConfig.width = this.props.width
     this.mainConfig.height = this.props.height
 
-    let gradientBackgroundConfig = new GenerateLinearGradient(this.props.width, this.props.height, 1, this.state.colors)
+    let gradientBackgroundConfig = new GenerateLinearGradient(this.props.width, this.props.height, 1, this.state.colors.slice())
     this.mainConfig.gradientBackgroundConfig = gradientBackgroundConfig
 
     let radialChance = Math.random()
@@ -89,26 +89,26 @@ export default class DisplayCanvas extends React.Component {
     if(radialChance > 0.4) {
       this.mainConfig.firstBlend = this.randomBlendMode()
 
-      let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height, this.state.colors)
+      let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height, this.state.colors.slice())
       this.mainConfig.radialFieldConfig = radialFieldConfig
     }
 
     this.mainConfig.secondBlend = this.randomBlendMode()
 
-    let starFieldConfig = new GenerateStarField(this.props.width, this.props.height)
+    let starFieldConfig = new GenerateStarField(this.props.width, this.props.height, this.state.colors.slice())
     this.mainConfig.starFieldConfig = starFieldConfig
 
     let geometryChance = Math.random()
 
     if(geometryChance >= 0.6) {
       this.mainConfig.thirdBlend = this.randomBlendMode()
-      let geometryConfig = new GenerateGeometricShape(this.props.width, this.props.height, 10 + Math.round(Math.random() * 30))
+      let geometryConfig = new GenerateGeometricShape(this.props.width, this.props.height, 10 + Math.round(Math.random() * 30), this.state.colors.slice())
       this.mainConfig.geometryConfig = geometryConfig
     }
 
     let overlayChance = Math.random()
 
-    if(overlayChance >= 0) {
+    if(overlayChance >= 0.7 && this.state.colors.length > 0) {
       this.mainConfig.overlayBlend = this.randomBlendMode()
       this.mainConfig.overlayAlpha = (Math.random()).toFixed(2)
       let overlayConfig = new GenerateLinearGradient(this.props.width, this.props.height, Math.round(Math.random() * 2))
