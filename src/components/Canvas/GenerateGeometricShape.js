@@ -13,7 +13,7 @@ export default class GenerateGeometricShape {
     this.shapeVertices = 3 + Math.round(Math.random() * 9)
     this.shapeDepth = 2 + Math.round(Math.random() * 4)
     this.shapeAng = 360/this.shapeVertices
-    this.shapeSize = Math.round(Math.random() * width * height / (height * 3))
+    this.shapeSize = 150 + Math.round(Math.random() * width * height / (height * 3))
 
     this.points = this.pointsArray(this.shapeSize)
 
@@ -58,11 +58,13 @@ export default class GenerateGeometricShape {
     )
 
     if(this.colors.length > 0) {
+      this.shuffleColors(this.colors)
       if(this.colors.length === 1) {
+        let ranGrayScale = Math.round(Math.random() * 255)
         shape.colors.push(
           this.colors[0],
-          tinycolor(this.colors[0]).spin(-20 + Math.random() * 40).toHexString(),
-          tinycolor(this.colors[0]).spin(-20 + Math.random() * 40).toHexString()
+          tinycolor({ r: ranGrayScale, g: ranGrayScale, b: ranGrayScale }),
+          tinycolor(this.colors[0]).spin(-40 + Math.random() * 80).toHexString()
         )
       } else if (this.colors.length === 2) {
         shape.colors.push(
@@ -84,6 +86,12 @@ export default class GenerateGeometricShape {
     this.shuffle(shape.colors)
 
     return shape
+  }
+
+  shuffleColors(array) {
+    for(let i = 0; i < array.length; i++) {
+      array[i] = tinycolor(array[i]).spin(-10 + Math.random() * 20).toHexString()
+    }
   }
 
   shuffle(array) {

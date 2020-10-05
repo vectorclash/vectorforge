@@ -70,6 +70,8 @@ export default class DisplayCanvas extends React.Component {
     } else {
       this.onGenerateButtonClick()
     }
+
+    window.addEventListener('keyup', this.onKeyUp.bind(this))
   }
 
   buildConfig() {
@@ -102,6 +104,7 @@ export default class DisplayCanvas extends React.Component {
 
     if(geometryChance >= 0.6) {
       this.mainConfig.thirdBlend = this.randomBlendMode()
+      
       let geometryConfig = new GenerateGeometricShape(this.props.width, this.props.height, 10 + Math.round(Math.random() * 30), this.state.colors.slice())
       this.mainConfig.geometryConfig = geometryConfig
     }
@@ -111,7 +114,7 @@ export default class DisplayCanvas extends React.Component {
     if(overlayChance >= 0.7 && this.state.colors.length > 0) {
       this.mainConfig.overlayBlend = this.randomBlendMode()
       this.mainConfig.overlayAlpha = (Math.random()).toFixed(2)
-      let overlayConfig = new GenerateLinearGradient(this.props.width, this.props.height, Math.round(Math.random() * 2))
+      let overlayConfig = new GenerateLinearGradient(this.props.width, this.props.height, Math.round(Math.random() * 2), this.state.colors.slice())
       this.mainConfig.overlayConfig = overlayConfig
     }
 
@@ -174,7 +177,7 @@ export default class DisplayCanvas extends React.Component {
       this.clearElement(gradientOverlay)
     }
 
-    canvas.toBlob(this.setImage.bind(this), 'image/jpeg', 0.95)
+    canvas.toBlob(this.setImage.bind(this), 'image/jpeg', 0.98)
 
     this.clearElement(canvas)
   }
@@ -499,6 +502,12 @@ export default class DisplayCanvas extends React.Component {
 
       this.animateColors()
     })
+  }
+
+  onKeyUp(e) { 
+    if (e.key === "Enter" && !this.state.controlsAreOpen) {
+      this.onGenerateButtonClick()
+    }
   }
 
   //
