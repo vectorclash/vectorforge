@@ -435,9 +435,9 @@ export default class DisplayCanvas extends React.Component {
   onSettingsButtonClick(e) {
     gsap.to('#controls-main', {
       duration: 0.2,
-      alpha: 0.3,
+      alpha: 0.5,
       scale: 0.9,
-      filter: 'blur(2px)',
+      filter: 'blur(3px)',
       ease: Back.easeOut
     })
 
