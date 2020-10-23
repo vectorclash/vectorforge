@@ -30,6 +30,7 @@ export default class DisplayCanvas extends React.Component {
     this.state = {
       generateDisabled: false,
       isLoading: false,
+      isSaving: false,
       isSaved: false,
       controlsAreOpen: true,
       canCloseAgain: false,
@@ -65,7 +66,6 @@ export default class DisplayCanvas extends React.Component {
         isLoading: true,
         isSaved: true
       })
-      this.onCloseButtonClick()
       this.loadImageFromAirtable(id)
     } else {
       this.onGenerateButtonClick()
@@ -122,12 +122,6 @@ export default class DisplayCanvas extends React.Component {
   }
 
   buildImage(config) {
-    gsap.to('.image-container', {
-      duration: 0.2,
-      alpha: 0,
-      ease: Quad.easeInOut
-    })
-
     let canvas = document.createElement('canvas')
     let context = canvas.getContext('2d')
 
@@ -220,17 +214,24 @@ export default class DisplayCanvas extends React.Component {
           "Configuration": JSON.stringify(this.mainConfig)
         }
       }
-    ], function(err, records) {
+    ], (err, records) => {
       if (err) {
         this.setState({
-          isSaved: false
+          isSaved: false,
+          isSaving: false
         })
         console.error(err)
         return
       }
-      records.forEach(function (record) {
+
+      records.forEach((record) => {
         let imageIDField = document.querySelector('#imageID')
-        imageIDField.value = id
+        imageIDField.value = record.fields.ID
+
+        this.setState({
+          isSaved: true,
+          isSaving: false
+        }) 
       })
     })
   }
@@ -273,7 +274,6 @@ export default class DisplayCanvas extends React.Component {
         this.setState({
           generateDisabled: false,
           isLoading: false,
-          isSaved: false
         })
       })
     })
@@ -326,40 +326,52 @@ export default class DisplayCanvas extends React.Component {
   // event handlers
 
   onLoadButtonClick(e) {
-    let imageIDField = document.querySelector('#imageID')
-    if(imageIDField.value) {
-      this.setState({
-        isLoading: true
-      })
-      this.loadImageFromAirtable(imageIDField.value)
-    } else {
-      gsap.to('input', {
-        duration: 0.1,
-        scaleX: 1.2,
-        scaleY: 1.4,
-        rotation: -0.5 + Math.random() * 1,
-        skewY: -5 + Math.random() * 10,
-        ease: Bounce.easeOut
+    const { generateDisabled } = this.state
+
+    if (!generateDisabled) {
+      gsap.to('.image-container', {
+        duration: 0.2,
+        alpha: 0,
+        ease: Quad.easeInOut
       })
 
-      gsap.to('input', {
-        duration: 0.1,
-        scale: 1,
-        rotation: 0,
-        skewY: 0,
-        ease: Bounce.easeOut,
-        delay: 0.1
-      })
+      let imageIDField = document.querySelector('#imageID')
+      if (imageIDField.value) {
+        this.setState({
+          isLoading: true,
+          isSaved: true
+        })
+        this.loadImageFromAirtable(imageIDField.value)
+      } else {
+        gsap.to('input', {
+          duration: 0.1,
+          scaleX: 1.2,
+          scaleY: 1.4,
+          rotation: -0.5 + Math.random() * 1,
+          skewY: -5 + Math.random() * 10,
+          ease: Bounce.easeOut
+        })
+
+        gsap.to('input', {
+          duration: 0.1,
+          scale: 1,
+          rotation: 0,
+          skewY: 0,
+          ease: Bounce.easeOut,
+          delay: 0.1
+        })
+      }
     }
   }
 
   onSaveButtonClick(e) {
-    const {isSaved} = this.state
+    const {isSaving, isSaved} = this.state
 
-    if(this.mainConfig && !isSaved) {
+    if(this.mainConfig && !isSaved && !isSaving) {
       this.setState({
-        isSaved: true
+        isSaving: true
       })
+
       this.saveImageToAirtable()
     }
   }
@@ -374,8 +386,15 @@ export default class DisplayCanvas extends React.Component {
     const {generateDisabled} = this.state
 
     if(!generateDisabled) {
+      gsap.to('.image-container', {
+        duration: 0.2,
+        alpha: 0,
+        ease: Quad.easeInOut
+      })
+
       this.setState({
-        isLoading: true
+        isLoading: true,
+        isSaved: false
       })
 
       let imageIDField = document.querySelector('#imageID')
@@ -510,10 +529,22 @@ export default class DisplayCanvas extends React.Component {
     }
   }
 
+  onImageIDFieldClick(e) {
+    const {isSaved} = this.state
+    if (isSaved && e.target.value.length > 0) {
+      let imageURL = window.location.origin.toString() + '/forge/?id=' + this.state.activeImage
+      navigator.clipboard.writeText(imageURL).then(function () {
+        alert('Image URL was copied to clipboard')
+      }, function () {
+        console.log('Copy Error')
+      })
+    }
+  }
+
   //
 
   render() {
-    const {isLoading, controlsAreOpen, generateDisabled, controlsBlurred, colors} = this.state
+    const {isLoading, isSaving, isSaved, controlsAreOpen, generateDisabled, controlsBlurred, colors} = this.state
 
     return (
       <div className="display-canvas" ref={mount => {this.mount = mount}}>
@@ -526,14 +557,18 @@ export default class DisplayCanvas extends React.Component {
           {controlsAreOpen ? <div className="controls-background-click" onClick={this.onCloseButtonClick.bind(this)}></div> : ''} 
           <div id="controls-main" className={'controls-inner' + (controlsBlurred ? ' controls-blurred' : '')}>
             <div className="row">
-              <button onClick={this.onGenerateButtonClick.bind(this)} className={'button-large' + (generateDisabled ? ' disabled' : ' enabled')}>Generate</button>
+              <button onClick={this.onGenerateButtonClick.bind(this)} className={'button-large' + (generateDisabled ? ' disabled' : ' enabled')}>
+                {generateDisabled ? 'Generating' : 'Generate'}
+              </button>
             </div>
             <div className="row">
-              <button onClick={this.onSaveButtonClick.bind(this)} className="button-small">Save</button>
+              <button onClick={this.onSaveButtonClick.bind(this)} className="button-small">
+                {isSaving ? 'Saving' : [isSaved ? 'Saved' : 'Save']}
+              </button>
               <button onClick={this.onDownloadButtonClick.bind(this)} className="button-small">Download</button>
             </div>
             <div className="row">
-              <input type="search" id="imageID" name="imageID"></input>
+              <input type="search" id="imageID" name="imageID" onClick={this.onImageIDFieldClick.bind(this)}></input>
             </div>
             <div className="row">
               <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">Load</button>

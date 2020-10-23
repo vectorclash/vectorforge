@@ -5,7 +5,10 @@ const astroNouns = [
   'Chromosphere',
   'Comet',
   'Eclipse',
+  'Element',
+  'Energy',
   'Filament',
+  'Gravity',
   'Cluster',
   'Heliopause',
   'Field',
@@ -43,10 +46,9 @@ const astroAdj = [
 export default function FileName() {
   let name = astroAdj[Math.floor(Math.random() * astroAdj.length)] + astroNouns[Math.floor(Math.random() * astroNouns.length)]
   // let d = Date.now()
-  let d1 = Math.floor(10000 + Math.random() * 90000)
-  let d2 = Math.floor(1000 + Math.random() * 9000)
+  let d1 = Math.floor(1000000 + Math.random() * 9000000)
 
-  name += '_' + d1 + '-' + d2
+  name += '_' + d1
 
   return name
 }
