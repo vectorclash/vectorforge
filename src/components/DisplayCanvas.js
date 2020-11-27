@@ -650,7 +650,7 @@ export default class DisplayCanvas extends React.Component {
               <p onClick={this.onDirectLinkClick.bind(this)}>
                 <b>https://www.vectorclash.space/forge/?id={ activeImage }</b>
               </p>
-              {linkCopied ? <p>Link copied to clipboard!</p> : ''}
+              {linkCopied ? <p class="alert">Link copied to clipboard</p> : ''}
             </div>
             <div className="row">
               <button onClick={this.onSettingsCloseButtonClick.bind(this)} className="button-medium">BACK</button>

@@ -225,6 +225,14 @@
         b {
           cursor: pointer;
         }
+
+        .alert {
+          font-weight: bold;
+          background-image: linear-gradient(42deg, rgba(51, 0, 82, 0.5), rgba(255, 0, 130, 0.4));
+          padding: 5px;
+          padding-left: 10px;
+          border-radius: 4px;
+        }
       }
 
       .row.colors {
