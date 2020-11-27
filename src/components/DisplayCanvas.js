@@ -646,9 +646,9 @@ export default class DisplayCanvas extends React.Component {
           <div id="controls-save" className={'controls-inner controls-settings' + (saveVisible ? ' controls-visible' : '')}>
             <div className="row text-container">
               <h6>Image Saved</h6>
-              <p>Use tthe link below to retrieve your image or enter the image ID into the input field and press the load button</p>
+              <p>Use the link below to retrieve your image or enter the image ID into the input field and press the load button</p>
               <p onClick={this.onDirectLinkClick.bind(this)}>
-                <b>http://www.vectorclash.space/forge/?id={ activeImage }</b>
+                <b>https://www.vectorclash.space/forge/?id={ activeImage }</b>
               </p>
               {linkCopied ? <p>Link copied to clipboard!</p> : ''}
             </div>
