@@ -32,6 +32,7 @@ export default class DisplayCanvas extends React.Component {
       isLoading: false,
       isSaving: false,
       isSaved: false,
+      loadFieldText: '',
       controlsAreOpen: true,
       canCloseAgain: false,
       activeImage: '',
@@ -54,7 +55,7 @@ export default class DisplayCanvas extends React.Component {
       {id: 'star-large', src: s1},
       {id: 'star-small', src: s2}
     ]
-    
+
     this.queue = new window.createjs.LoadQueue(true, '')
     this.queue.on('complete', this.init, this)
     this.queue.loadManifest(queueItems)
@@ -195,7 +196,7 @@ export default class DisplayCanvas extends React.Component {
       buttonColor = '#FAFAFA'
     }
 
-    gsap.set('.button-large', {
+    gsap.set('.button-large, .text-container', {
       backgroundImage: buttonGradient,
       color: buttonColor
     })
@@ -555,8 +556,18 @@ export default class DisplayCanvas extends React.Component {
     }
   }
 
-  onImageIDFieldClick(e) {
-    
+  onImageIDFieldFocus(e) {
+    if(e.target.value !== '') {
+      this.setState({ loadFieldText: e.target.value })
+    }
+    e.target.value = ''
+  }
+
+  onImageIDFieldBlur(e) {
+    const { loadFieldText } = this.state
+    if (e.target.value === '' && loadFieldText !== '') {
+      e.target.value = loadFieldText
+    }
   }
 
   onDirectLinkClick(e) {
@@ -598,7 +609,7 @@ export default class DisplayCanvas extends React.Component {
               <button onClick={this.onDownloadButtonClick.bind(this)} className="button-small">Download</button>
             </div>
             <div className="row">
-              <input type="search" id="imageID" name="imageID" onClick={this.onImageIDFieldClick.bind(this)}></input>
+              <input type="search" id="imageID" name="imageID" onBlur={this.onImageIDFieldBlur.bind(this)} onFocus={this.onImageIDFieldFocus.bind(this)}></input>
             </div>
             <div className="row">
               <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">Load</button>
