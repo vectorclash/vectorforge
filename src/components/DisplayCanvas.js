@@ -400,6 +400,10 @@ export default class DisplayCanvas extends React.Component {
 
       this.saveImageToAirtable()
     }
+
+    if(isSaved) {
+      this.openSavePanel()
+    }
   }
 
   onDownloadButtonClick(e) {
@@ -513,6 +517,7 @@ export default class DisplayCanvas extends React.Component {
     this.setState({
       controlsBlurred: false,
       saveVisible: false,
+      linkCopied: false
     })
   }
 
