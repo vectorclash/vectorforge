@@ -36,7 +36,9 @@ export default class DisplayCanvas extends React.Component {
       canCloseAgain: false,
       activeImage: '',
       controlsBlurred: false,
-      colors: []
+      saveVisible: false,
+      colors: [],
+      linkCopied: false,
     }
   }
 
@@ -52,7 +54,7 @@ export default class DisplayCanvas extends React.Component {
       {id: 'star-large', src: s1},
       {id: 'star-small', src: s2}
     ]
-
+    
     this.queue = new window.createjs.LoadQueue(true, '')
     this.queue.on('complete', this.init, this)
     this.queue.loadManifest(queueItems)
@@ -129,7 +131,8 @@ export default class DisplayCanvas extends React.Component {
     canvas.height = this.props.height
 
     this.setState({
-      generateDisabled: true
+      generateDisabled: true,
+      linkCopied: false
     })
 
     let gradientBackground = new LinearGradient(config.gradientBackgroundConfig)
@@ -231,7 +234,9 @@ export default class DisplayCanvas extends React.Component {
         this.setState({
           isSaved: true,
           isSaving: false
-        }) 
+        })
+        
+        this.openSavePanel()
       })
     })
   }
@@ -323,18 +328,33 @@ export default class DisplayCanvas extends React.Component {
     })
   }
 
+  openSavePanel() {
+    gsap.to('#controls-main', {
+      duration: 0.2,
+      alpha: 0.5,
+      scale: 0.9,
+      filter: 'blur(3px)',
+      ease: Back.easeOut
+    })
+
+    gsap.from('#controls-save', {
+      duration: 0.2,
+      alpha: 0,
+      scale: 1.2,
+      ease: Back.easeOut
+    })
+
+    this.setState({
+      saveVisible: true
+    })
+  }
+
   // event handlers
 
   onLoadButtonClick(e) {
     const { generateDisabled } = this.state
 
     if (!generateDisabled) {
-      gsap.to('.image-container', {
-        duration: 0.2,
-        alpha: 0,
-        ease: Quad.easeInOut
-      })
-
       let imageIDField = document.querySelector('#imageID')
       if (imageIDField.value) {
         this.setState({
@@ -342,6 +362,11 @@ export default class DisplayCanvas extends React.Component {
           isSaved: true
         })
         this.loadImageFromAirtable(imageIDField.value)
+        gsap.to('.image-container', {
+          duration: 0.2,
+          alpha: 0,
+          ease: Quad.easeInOut
+        })
       } else {
         gsap.to('input', {
           duration: 0.1,
@@ -485,7 +510,8 @@ export default class DisplayCanvas extends React.Component {
     })
 
     this.setState({
-      controlsBlurred: false
+      controlsBlurred: false,
+      saveVisible: false,
     })
   }
 
@@ -530,12 +556,16 @@ export default class DisplayCanvas extends React.Component {
   }
 
   onImageIDFieldClick(e) {
-    const {isSaved} = this.state
-    if (isSaved && e.target.value.length > 0) {
+    
+  }
+
+  onDirectLinkClick(e) {
+    const { isSaved } = this.state
+    if (isSaved) {
       let imageURL = window.location.origin.toString() + '/forge/?id=' + this.state.activeImage
       navigator.clipboard.writeText(imageURL).then(function () {
-        alert('Image URL was copied to clipboard')
-      }, function () {
+        this.setState({ linkCopied: true })
+      }.bind(this), function () {
         console.log('Copy Error')
       })
     }
@@ -544,7 +574,7 @@ export default class DisplayCanvas extends React.Component {
   //
 
   render() {
-    const {isLoading, isSaving, isSaved, controlsAreOpen, generateDisabled, controlsBlurred, colors} = this.state
+    const { isLoading, isSaving, isSaved, controlsAreOpen, generateDisabled, controlsBlurred, colors, saveVisible, activeImage, linkCopied} = this.state
 
     return (
       <div className="display-canvas" ref={mount => {this.mount = mount}}>
@@ -580,6 +610,7 @@ export default class DisplayCanvas extends React.Component {
               </button>
             </div>
           </div>
+
           <div id="controls-settings" className={'controls-inner controls-settings' + (controlsBlurred ? ' controls-visible' : '')}>
             <div className="row colors">
               {colors.map((color, index) => (
@@ -590,6 +621,20 @@ export default class DisplayCanvas extends React.Component {
                 />
               ))}
               {colors.length < 6 ? <button onClick={this.onAddColorButtonClick.bind(this)} className="button-small">ADD COLOR <AddColorButton /></button> : ''}
+            </div>
+            <div className="row">
+              <button onClick={this.onSettingsCloseButtonClick.bind(this)} className="button-medium">BACK</button>
+            </div>
+          </div>
+
+          <div id="controls-save" className={'controls-inner controls-settings' + (saveVisible ? ' controls-visible' : '')}>
+            <div className="row text-container">
+              <h6>Image Saved</h6>
+              <p>Use tthe link below to retrieve your image or enter the image ID into the input field and press the load button</p>
+              <p onClick={this.onDirectLinkClick.bind(this)}>
+                <b>http://www.vectorclash.space/forge/?id={ activeImage }</b>
+              </p>
+              {linkCopied ? <p>Link copied to clipboard!</p> : ''}
             </div>
             <div className="row">
               <button onClick={this.onSettingsCloseButtonClick.bind(this)} className="button-medium">BACK</button>
