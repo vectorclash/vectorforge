@@ -614,7 +614,7 @@ export default class DisplayCanvas extends React.Component {
               <button onClick={this.onDownloadButtonClick.bind(this)} className="button-small">Download</button>
             </div>
             <div className="row">
-              <input type="search" id="imageID" name="imageID" onBlur={this.onImageIDFieldBlur.bind(this)} onFocus={this.onImageIDFieldFocus.bind(this)}></input>
+              <input id="imageID" name="imageID" onBlur={this.onImageIDFieldBlur.bind(this)} onFocus={this.onImageIDFieldFocus.bind(this)}></input>
             </div>
             <div className="row">
               <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">Load</button>
