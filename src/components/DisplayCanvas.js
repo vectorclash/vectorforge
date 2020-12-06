@@ -29,6 +29,7 @@ export default class DisplayCanvas extends React.Component {
     super(props)
     this.state = {
       generateDisabled: false,
+      isLoadingFromDB: false,
       isLoading: false,
       isSaving: false,
       isSaved: false,
@@ -67,7 +68,8 @@ export default class DisplayCanvas extends React.Component {
     if(id) {
       this.setState({
         isLoading: true,
-        isSaved: true
+        isSaved: true,
+        isLoadingFromDB: true,
       })
       this.loadImageFromAirtable(id)
     } else {
@@ -247,15 +249,39 @@ export default class DisplayCanvas extends React.Component {
       filterByFormula: "({ID} = '" + id + "')"
     }).firstPage(function(err, records) {
       if(err) {
+        this.setState({
+          isLoadingFromDB: false,
+          isLoading: false,
+          isSaved: false
+        })
         console.error(err)
         return
       }
 
       if(records[0]) {
         this.setState({
+          isLoadingFromDB: false,
+          isLoading: true,
+          isSaved: true,
           activeImage: id
         })
+
+        gsap.to('.image-container', {
+          duration: 0.2,
+          alpha: 0,
+          ease: Quad.easeInOut
+        })
+
         this.buildImage(JSON.parse(records[0].fields.Configuration))
+      } else {
+        let imageIDField = document.querySelector('#imageID')
+        imageIDField.value = ''
+        this.wiggleLoadField()
+        this.setState({
+          isLoadingFromDB: false,
+          isLoading: false,
+          isSaved: false
+        })
       }
     }.bind(this))
   }
@@ -350,42 +376,44 @@ export default class DisplayCanvas extends React.Component {
     })
   }
 
+  wiggleLoadField() {
+    gsap.to('input', {
+      duration: 0.1,
+      scaleX: 1.2,
+      scaleY: 1.4,
+      rotation: -0.5 + Math.random() * 1,
+      skewY: -5 + Math.random() * 10,
+      ease: Bounce.easeOut
+    })
+
+    gsap.to('input', {
+      duration: 0.1,
+      scale: 1,
+      rotation: 0,
+      skewY: 0,
+      ease: Bounce.easeOut,
+      delay: 0.1
+    })
+  }
+
   // event handlers
 
   onLoadButtonClick(e) {
     const { generateDisabled } = this.state
 
+    this.setState({
+      isLoadingFromDB: true,
+    })
+
     if (!generateDisabled) {
       let imageIDField = document.querySelector('#imageID')
       if (imageIDField.value) {
-        this.setState({
-          isLoading: true,
-          isSaved: true
-        })
         this.loadImageFromAirtable(imageIDField.value)
-        gsap.to('.image-container', {
-          duration: 0.2,
-          alpha: 0,
-          ease: Quad.easeInOut
-        })
       } else {
-        gsap.to('input', {
-          duration: 0.1,
-          scaleX: 1.2,
-          scaleY: 1.4,
-          rotation: -0.5 + Math.random() * 1,
-          skewY: -5 + Math.random() * 10,
-          ease: Bounce.easeOut
+        this.setState({
+          isLoadingFromDB: false,
         })
-
-        gsap.to('input', {
-          duration: 0.1,
-          scale: 1,
-          rotation: 0,
-          skewY: 0,
-          ease: Bounce.easeOut,
-          delay: 0.1
-        })
+        this.wiggleLoadField()
       }
     }
   }
@@ -590,7 +618,7 @@ export default class DisplayCanvas extends React.Component {
   //
 
   render() {
-    const { isLoading, isSaving, isSaved, controlsAreOpen, generateDisabled, controlsBlurred, colors, saveVisible, activeImage, linkCopied} = this.state
+    const {isLoadingFromDB, isLoading, isSaving, isSaved, controlsAreOpen, generateDisabled, controlsBlurred, colors, saveVisible, activeImage, linkCopied} = this.state
 
     return (
       <div className="display-canvas" ref={mount => {this.mount = mount}}>
@@ -617,7 +645,9 @@ export default class DisplayCanvas extends React.Component {
               <input id="imageID" name="imageID" onBlur={this.onImageIDFieldBlur.bind(this)} onFocus={this.onImageIDFieldFocus.bind(this)}></input>
             </div>
             <div className="row">
-              <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">Load</button>
+              <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">
+                {isLoadingFromDB ? 'Loading' : 'Load'}
+              </button>
             </div>
             <div className="row">
               <h1>VECTOR<b>FORGE</b></h1>
