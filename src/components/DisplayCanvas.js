@@ -6,6 +6,7 @@ import saveAs from 'file-saver'
 
 import './DisplayCanvas.scss'
 
+import Copyright from './Copyright'
 import HexagonLoader from './HexagonLoader'
 import CloseButton from './buttons/CloseButton'
 import LinearGradient from './canvas/LinearGradient'
@@ -474,6 +475,13 @@ export default class DisplayCanvas extends React.Component {
           controlsAreOpen: false
         })
 
+        gsap.to('#copyright', {
+          duration: 0.3,
+          alpha: 0.2,
+          scale: 0.9,
+          ease: Quad.easeInOut
+        })
+
         gsap.to('.controls-container', {
           duration: 0.3,
           alpha: 0,
@@ -487,6 +495,13 @@ export default class DisplayCanvas extends React.Component {
       } else {
         this.setState({
           controlsAreOpen: true
+        })
+
+        gsap.to('#copyright', {
+          duration: 0.3,
+          alpha: 0.5,
+          scale: 1,
+          ease: Bounce.easeOut
         })
 
         gsap.to('.controls-container', {
@@ -689,6 +704,7 @@ export default class DisplayCanvas extends React.Component {
             </div>
           </div>
         </div>
+        <Copyright />
       </div>
     )
   }
