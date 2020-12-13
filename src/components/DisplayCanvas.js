@@ -131,8 +131,8 @@ export default class DisplayCanvas extends React.Component {
     let canvas = document.createElement('canvas')
     let context = canvas.getContext('2d')
 
-    canvas.width = this.props.width
-    canvas.height = this.props.height
+    canvas.width = config.width
+    canvas.height = config.height
 
     this.setState({
       generateDisabled: true,
@@ -498,10 +498,10 @@ export default class DisplayCanvas extends React.Component {
         })
 
         gsap.to('#copyright', {
-          duration: 0.3,
+          duration: 1,
           alpha: 0.5,
           scale: 1,
-          ease: Bounce.easeOut
+          ease: Back.easeOut
         })
 
         gsap.to('.controls-container', {
@@ -626,6 +626,15 @@ export default class DisplayCanvas extends React.Component {
       let imageURL = window.location.origin.toString() + '/forge/?id=' + this.state.activeImage
       navigator.clipboard.writeText(imageURL).then(function () {
         this.setState({ linkCopied: true })
+        gsap.fromTo('.alert', {
+          alpha: 0,
+          y: 10
+        }, {
+          alpha: 1,
+          y: 0,
+          duration: 0.3,
+          ease: Bounce.easeOut
+        })
       }.bind(this), function () {
         console.log('Copy Error')
       })
@@ -697,7 +706,7 @@ export default class DisplayCanvas extends React.Component {
               <p onClick={this.onDirectLinkClick.bind(this)}>
                 <b>https://www.vectorclash.space/forge/?id={ activeImage }</b>
               </p>
-              {linkCopied ? <p class="alert">Link copied to clipboard</p> : ''}
+              {linkCopied ? <p className="alert">Link copied to clipboard</p> : ''}
             </div>
             <div className="row">
               <button onClick={this.onSettingsCloseButtonClick.bind(this)} className="button-medium">BACK</button>
