@@ -1,22 +1,22 @@
 import React from 'react'
-import Airtable from 'airtable'
 import {gsap, Quad, Back, Bounce} from 'gsap'
 import tinycolor from 'tinycolor2'
 import saveAs from 'file-saver'
 
 import './DisplayCanvas.scss'
+import { getConfigFromUrl, generateShareUrl } from '../utils/urlConfig'
 
 import Copyright from './Copyright'
 import HexagonLoader from './HexagonLoader'
 import CloseButton from './buttons/CloseButton'
-import LinearGradient from './canvas/LinearGradient'
-import GenerateLinearGradient from './canvas/GenerateLinearGradient'
-import LargeRadialField from './canvas/LargeRadialField'
-import GenerateLargeRadialField from './canvas/GenerateLargeRadialField'
-import GenerateStarField from './canvas/GenerateStarField'
-import StarField from './canvas/StarField'
-import GenerateGeometricShape from './canvas/GenerateGeometricShape'
-import GeometricShape from './canvas/GeometricShape'
+import LinearGradient from './Canvas/LinearGradient'
+import GenerateLinearGradient from './Canvas/GenerateLinearGradient'
+import LargeRadialField from './Canvas/LargeRadialField'
+import GenerateLargeRadialField from './Canvas/GenerateLargeRadialField'
+import GenerateStarField from './Canvas/GenerateStarField'
+import StarField from './Canvas/StarField'
+import GenerateGeometricShape from './Canvas/GenerateGeometricShape'
+import GeometricShape from './Canvas/GeometricShape'
 import FileName from './FileNameGenerator'
 import SettingsButton from './buttons/SettingsButton'
 import AddColorButton from './buttons/AddColorButton'
@@ -30,14 +30,10 @@ export default class DisplayCanvas extends React.Component {
     super(props)
     this.state = {
       generateDisabled: false,
-      isLoadingFromDB: false,
       isLoading: false,
       isSaving: false,
       isSaved: false,
-      loadFieldText: '',
       controlsAreOpen: true,
-      canCloseAgain: false,
-      activeImage: '',
       controlsBlurred: false,
       saveVisible: false,
       colors: [],
@@ -46,13 +42,6 @@ export default class DisplayCanvas extends React.Component {
   }
 
   componentDidMount() {
-    Airtable.configure({
-      endpointUrl: 'https://api.airtable.com',
-      apiKey: 'keyea84FaAaGduqyx'
-    })
-
-    this.base = Airtable.base('appImg4GSWAPNn2Xc')
-
     let queueItems = [
       {id: 'star-large', src: s1},
       {id: 'star-small', src: s2}
@@ -64,15 +53,13 @@ export default class DisplayCanvas extends React.Component {
   }
 
   init() {
-    const urlParams = new URLSearchParams(window.location.search)
-    const id = urlParams.get('id')
-    if(id) {
+    const config = getConfigFromUrl()
+    if(config) {
       this.setState({
         isLoading: true,
         isSaved: true,
-        isLoadingFromDB: true,
       })
-      this.loadImageFromAirtable(id)
+      this.loadImageFromUrl(config)
     } else {
       this.onGenerateButtonClick()
     }
@@ -81,10 +68,6 @@ export default class DisplayCanvas extends React.Component {
   }
 
   buildConfig() {
-    this.setState({
-      activeImage: FileName()
-    })
-
     this.mainConfig = {}
     this.mainConfig.width = this.props.width
     this.mainConfig.height = this.props.height
@@ -139,7 +122,7 @@ export default class DisplayCanvas extends React.Component {
       linkCopied: false
     })
 
-    let gradientBackground = new LinearGradient(config.gradientBackgroundConfig)
+    let gradientBackground = LinearGradient(config.gradientBackgroundConfig)
     context.drawImage(gradientBackground, 0, 0)
     this.clearElement(gradientBackground)
 
@@ -150,21 +133,21 @@ export default class DisplayCanvas extends React.Component {
     if(config.radialFieldConfig) {
       context.globalCompositeOperation = config.firstBlend
 
-      let radialField = new LargeRadialField(config.radialFieldConfig)
+      let radialField = LargeRadialField(config.radialFieldConfig)
       context.drawImage(radialField, 0, 0)
       this.clearElement(radialField)
     }
 
     context.globalCompositeOperation = config.secondBlend
 
-    let starField = new StarField(config.starFieldConfig, this.queue)
+    let starField = StarField(config.starFieldConfig, this.queue)
     context.drawImage(starField, 0, 0)
     this.clearElement(starField)
 
     if(config.geometryConfig) {
       context.globalCompositeOperation = config.thirdBlend
 
-      let geometry = new GeometricShape(config.geometryConfig)
+      let geometry = GeometricShape(config.geometryConfig)
       context.drawImage(geometry, 0, 0)
       this.clearElement(geometry)
     }
@@ -173,7 +156,7 @@ export default class DisplayCanvas extends React.Component {
       context.globalCompositeOperation = config.overlayBlend
       context.globalAlpha = config.overlayAlpha
 
-      let gradientOverlay = new LinearGradient(config.overlayConfig)
+      let gradientOverlay = LinearGradient(config.overlayConfig)
       context.drawImage(gradientOverlay, 0, 0)
       this.clearElement(gradientOverlay)
     }
@@ -211,81 +194,41 @@ export default class DisplayCanvas extends React.Component {
     })
   }
 
-  saveImageToAirtable() {
-    let id = this.state.activeImage
+  saveImageToUrl() {
+    const shareUrl = generateShareUrl(this.mainConfig)
 
-    this.base('Images').create([
-      {
-        "fields": {
-          "ID": id,
-          "Configuration": JSON.stringify(this.mainConfig)
-        }
-      }
-    ], (err, records) => {
-      if (err) {
-        this.setState({
-          isSaved: false,
-          isSaving: false
-        })
-        console.error(err)
-        return
-      }
+    if (shareUrl) {
+      this.shareUrl = shareUrl
 
-      records.forEach((record) => {
-        let imageIDField = document.querySelector('#imageID')
-        imageIDField.value = record.fields.ID
-
-        this.setState({
-          isSaved: true,
-          isSaving: false,
-          isLoading: false
-        })
-        
-        this.openSavePanel()
+      this.setState({
+        isSaved: true,
+        isSaving: false,
+        isLoading: false
       })
-    })
+
+      this.openSavePanel()
+    } else {
+      this.setState({
+        isSaved: false,
+        isSaving: false
+      })
+      console.error('Failed to generate share URL')
+    }
   }
 
-  loadImageFromAirtable(id) {
-    this.base('Images').select({
-      filterByFormula: "({ID} = '" + id + "')"
-    }).firstPage(function(err, records) {
-      if(err) {
-        this.setState({
-          isLoadingFromDB: false,
-          isLoading: false,
-          isSaved: false
-        })
-        console.error(err)
-        return
-      }
+  loadImageFromUrl(config) {
+    this.setState({
+      isLoading: true,
+      isSaved: true,
+    })
 
-      if(records[0]) {
-        this.setState({
-          isLoadingFromDB: false,
-          isLoading: true,
-          isSaved: true,
-          activeImage: id
-        })
+    gsap.to('.image-container', {
+      duration: 0.2,
+      alpha: 0,
+      ease: Quad.easeInOut
+    })
 
-        gsap.to('.image-container', {
-          duration: 0.2,
-          alpha: 0,
-          ease: Quad.easeInOut
-        })
-
-        this.buildImage(JSON.parse(records[0].fields.Configuration))
-      } else {
-        let imageIDField = document.querySelector('#imageID')
-        imageIDField.value = ''
-        this.wiggleLoadField()
-        this.setState({
-          isLoadingFromDB: false,
-          isLoading: false,
-          isSaved: false
-        })
-      }
-    }.bind(this))
+    this.buildImage(config)
   }
 
   setImage(blob) {
@@ -401,23 +344,8 @@ export default class DisplayCanvas extends React.Component {
   // event handlers
 
   onLoadButtonClick(e) {
-    const { generateDisabled } = this.state
-
-    this.setState({
-      isLoadingFromDB: true,
-    })
-
-    if (!generateDisabled) {
-      let imageIDField = document.querySelector('#imageID')
-      if (imageIDField.value) {
-        this.loadImageFromAirtable(imageIDField.value)
-      } else {
-        this.setState({
-          isLoadingFromDB: false,
-        })
-        this.wiggleLoadField()
-      }
-    }
+    // This function is no longer used since we load from URL automatically
+    // Keeping it for potential future use
   }
 
   onSaveButtonClick(e) {
@@ -429,7 +357,7 @@ export default class DisplayCanvas extends React.Component {
         isLoading: true,
       })
 
-      this.saveImageToAirtable()
+      this.saveImageToUrl()
     }
 
     if(isSaved) {
@@ -439,7 +367,8 @@ export default class DisplayCanvas extends React.Component {
 
   onDownloadButtonClick(e) {
     if(this.blob) {
-      saveAs(this.blob, this.state.activeImage + '.jpg')
+      const filename = FileName()
+      saveAs(this.blob, filename + '.jpg')
     }
   }
 
@@ -458,9 +387,9 @@ export default class DisplayCanvas extends React.Component {
         isSaved: false
       })
 
-      let imageIDField = document.querySelector('#imageID')
-      imageIDField.value = ''
-      // this.onCloseButtonClick()
+      // Clear URL when generating new image
+      window.history.pushState({}, '', window.location.pathname)
+
       this.buildConfig()
     }
   }
@@ -606,25 +535,11 @@ export default class DisplayCanvas extends React.Component {
     }
   }
 
-  onImageIDFieldFocus(e) {
-    if(e.target.value !== '') {
-      this.setState({ loadFieldText: e.target.value })
-    }
-    e.target.value = ''
-  }
-
-  onImageIDFieldBlur(e) {
-    const { loadFieldText } = this.state
-    if (e.target.value === '' && loadFieldText !== '') {
-      e.target.value = loadFieldText
-    }
-  }
 
   onDirectLinkClick(e) {
     const { isSaved } = this.state
-    if (isSaved) {
-      let imageURL = window.location.origin.toString() + '/forge/?id=' + this.state.activeImage
-      navigator.clipboard.writeText(imageURL).then(function () {
+    if (isSaved && this.shareUrl) {
+      navigator.clipboard.writeText(this.shareUrl).then(function () {
         this.setState({ linkCopied: true })
         gsap.fromTo('.alert', {
           alpha: 0,
@@ -644,7 +559,7 @@ export default class DisplayCanvas extends React.Component {
   //
 
   render() {
-    const {isLoadingFromDB, isLoading, isSaving, isSaved, controlsAreOpen, generateDisabled, controlsBlurred, colors, saveVisible, activeImage, linkCopied} = this.state
+    const {isLoading, isSaving, isSaved, controlsAreOpen, generateDisabled, controlsBlurred, colors, saveVisible, linkCopied} = this.state
 
     return (
       <div className="display-canvas" ref={mount => {this.mount = mount}}>
@@ -666,14 +581,6 @@ export default class DisplayCanvas extends React.Component {
                 {isSaving ? 'Saving' : [isSaved ? 'Saved' : 'Save']}
               </button>
               <button onClick={this.onDownloadButtonClick.bind(this)} className="button-small">Download</button>
-            </div>
-            <div className="row">
-              <input id="imageID" name="imageID" onBlur={this.onImageIDFieldBlur.bind(this)} onFocus={this.onImageIDFieldFocus.bind(this)}></input>
-            </div>
-            <div className="row">
-              <button onClick={this.onLoadButtonClick.bind(this)} className="button-medium">
-                {isLoadingFromDB ? 'Loading' : 'Load'}
-              </button>
             </div>
             <div className="row">
               <h1>VECTOR<b>FORGE</b></h1>
@@ -701,11 +608,24 @@ export default class DisplayCanvas extends React.Component {
 
           <div id="controls-save" className={'controls-inner controls-settings' + (saveVisible ? ' controls-visible' : '')}>
             <div className="row text-container">
-              <h6>Image Saved</h6>
-              <p>Use the link below to retrieve your image or enter the image ID into the input field and press the load button</p>
-              <p onClick={this.onDirectLinkClick.bind(this)}>
-                <b>https://www.vectorclash.space/forge/?id={ activeImage }</b>
-              </p>
+              <h6>Shareable Link Created</h6>
+              <p>Click the link below to copy it to your clipboard. Anyone with this link can view and recreate this image.</p>
+              <div
+                onClick={this.onDirectLinkClick.bind(this)}
+                style={{
+                  cursor: 'pointer',
+                  padding: '10px',
+                  background: 'rgba(0,0,0,0.2)',
+                  borderRadius: '4px',
+                  maxHeight: '100px',
+                  overflow: 'auto',
+                  wordBreak: 'break-all',
+                  fontSize: '12px',
+                  marginBottom: '10px'
+                }}
+              >
+                {this.shareUrl || 'Generating link...'}
+              </div>
               {linkCopied ? <p className="alert">Link copied to clipboard</p> : ''}
             </div>
             <div className="row">
