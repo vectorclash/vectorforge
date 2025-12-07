@@ -4,13 +4,56 @@
   height: 60px;
   margin-bottom: 10px;
   opacity: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+  border: 2px solid transparent;
+
+  &.dragging {
+    opacity: 0.4 !important;
+  }
+
+  &.drag-over {
+    border: 2px solid #2cd8fe;
+    box-shadow: 0 0 15px rgba(#2cd8fe, 0.6);
+    transform: scale(1.05);
+  }
+
+  &.dragging.drag-over {
+    border: 2px solid transparent;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .color-drag-handle {
+    position: absolute;
+    left: 5px;
+    top: 0;
+    height: 100%;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 16px;
+    z-index: 10;
+    user-select: none;
+    letter-spacing: -2px;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
 
   input {
     height: 100% !important;
     font-size: 10px;
     background-color: rgba(0, 0, 0, 0.4);
     cursor: pointer;
-    padding-left: 0 !important;
+    padding-left: 30px !important;
     z-index: 0;
   }
 

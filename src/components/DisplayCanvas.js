@@ -39,6 +39,7 @@ export default class DisplayCanvas extends React.Component {
       colors: [],
       linkCopied: false,
     }
+    this.nextColorId = 0
   }
 
   componentDidMount() {
@@ -72,7 +73,10 @@ export default class DisplayCanvas extends React.Component {
     this.mainConfig.width = this.props.width
     this.mainConfig.height = this.props.height
 
-    let gradientBackgroundConfig = new GenerateLinearGradient(this.props.width, this.props.height, 1, this.state.colors.slice())
+    // Convert color objects to color values array
+    const colorValues = this.state.colors.map(c => c.value || c)
+
+    let gradientBackgroundConfig = new GenerateLinearGradient(this.props.width, this.props.height, 1, colorValues.slice())
     this.mainConfig.gradientBackgroundConfig = gradientBackgroundConfig
 
     let radialChance = Math.random()
@@ -80,21 +84,21 @@ export default class DisplayCanvas extends React.Component {
     if(radialChance > 0.4) {
       this.mainConfig.firstBlend = this.randomBlendMode()
 
-      let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height, this.state.colors.slice())
+      let radialFieldConfig = new GenerateLargeRadialField(this.props.width, this.props.height, colorValues.slice())
       this.mainConfig.radialFieldConfig = radialFieldConfig
     }
 
     this.mainConfig.secondBlend = this.randomBlendMode()
 
-    let starFieldConfig = new GenerateStarField(this.props.width, this.props.height, this.state.colors.slice())
+    let starFieldConfig = new GenerateStarField(this.props.width, this.props.height, colorValues.slice())
     this.mainConfig.starFieldConfig = starFieldConfig
 
     let geometryChance = Math.random()
 
     if(geometryChance >= 0.6) {
       this.mainConfig.thirdBlend = this.randomBlendMode()
-      
-      let geometryConfig = new GenerateGeometricShape(this.props.width, this.props.height, 10 + Math.round(Math.random() * 30), this.state.colors.slice())
+
+      let geometryConfig = new GenerateGeometricShape(this.props.width, this.props.height, 10 + Math.round(Math.random() * 30), colorValues.slice())
       this.mainConfig.geometryConfig = geometryConfig
     }
 
@@ -103,7 +107,7 @@ export default class DisplayCanvas extends React.Component {
     if(overlayChance >= 0.7 && this.state.colors.length > 0) {
       this.mainConfig.overlayBlend = this.randomBlendMode()
       this.mainConfig.overlayAlpha = (Math.random()).toFixed(2)
-      let overlayConfig = new GenerateLinearGradient(this.props.width, this.props.height, Math.round(Math.random() * 2), this.state.colors.slice())
+      let overlayConfig = new GenerateLinearGradient(this.props.width, this.props.height, Math.round(Math.random() * 2), colorValues.slice())
       this.mainConfig.overlayConfig = overlayConfig
     }
 
@@ -290,13 +294,13 @@ export default class DisplayCanvas extends React.Component {
 
   updateColors() {
     let colorFields = document.querySelectorAll('.color')
-    let colorArray = []
-    for (let i = 0; i < colorFields.length; i++) {
-      colorArray.push(colorFields[i].value)
-    }
+    let colors = this.state.colors.map((colorObj, index) => ({
+      ...colorObj,
+      value: colorFields[index] ? colorFields[index].value : colorObj.value
+    }))
 
     this.setState({
-      colors: colorArray
+      colors: colors
     })
   }
 
@@ -497,7 +501,10 @@ export default class DisplayCanvas extends React.Component {
 
   onAddColorButtonClick(e) {
     let colors = [...this.state.colors]
-    colors.push(new tinycolor.random().toHexString())
+    colors.push({
+      id: this.nextColorId++,
+      value: new tinycolor.random().toHexString()
+    })
     this.setState({
       colors: colors
     })
@@ -507,25 +514,42 @@ export default class DisplayCanvas extends React.Component {
     })
   }
 
-  onRemoveColorbuttonClick(color) {
+  onRemoveColorbuttonClick(colorId) {
+    // Update all color values from DOM first
     let colorFields = document.querySelectorAll('.color')
-    let colorArray = []
-    for (let i = 0; i < colorFields.length; i++) {
-      if (colorFields[i].value !== color) {
-        colorArray.push(colorFields[i].value)
-      }
-    }
-    
+    let colors = this.state.colors.map((colorObj, index) => ({
+      ...colorObj,
+      value: colorFields[index] ? colorFields[index].value : colorObj.value
+    }))
+
+    // Filter out the color to remove by ID
+    colors = colors.filter(colorObj => colorObj.id !== colorId)
+
     this.setState({
-      colors: []
+      colors: colors
     })
+  }
 
-    gsap.delayedCall(0.001, () => {
-      this.setState({
-        colors: colorArray
-      })
+  onReorderColors(draggedColorId, targetColorId) {
+    // Update all color values from DOM first
+    let colorFields = document.querySelectorAll('.color')
+    let colors = this.state.colors.map((colorObj, index) => ({
+      ...colorObj,
+      value: colorFields[index] ? colorFields[index].value : colorObj.value
+    }))
 
-      this.animateColors()
+    // Find indices
+    const draggedIndex = colors.findIndex(c => c.id === draggedColorId)
+    const targetIndex = colors.findIndex(c => c.id === targetColorId)
+
+    if (draggedIndex === -1 || targetIndex === -1) return
+
+    // Reorder array
+    const [removed] = colors.splice(draggedIndex, 1)
+    colors.splice(targetIndex, 0, removed)
+
+    this.setState({
+      colors: colors
     })
   }
 
@@ -592,11 +616,13 @@ export default class DisplayCanvas extends React.Component {
 
           <div id="controls-settings" className={'controls-inner controls-settings' + (controlsBlurred ? ' controls-visible' : '')}>
             <div className="row colors">
-              {colors.map((color, index) => (
-                <ColorField 
-                  color={color} 
-                  key={index}
-                  callback={this.onRemoveColorbuttonClick.bind(this)} 
+              {colors.map((colorObj) => (
+                <ColorField
+                  color={colorObj.value || colorObj}
+                  key={colorObj.id}
+                  colorId={colorObj.id}
+                  callback={this.onRemoveColorbuttonClick.bind(this)}
+                  onReorder={this.onReorderColors.bind(this)}
                 />
               ))}
               {colors.length < 6 ? <button onClick={this.onAddColorButtonClick.bind(this)} className="button-small">ADD COLOR <AddColorButton /></button> : ''}
