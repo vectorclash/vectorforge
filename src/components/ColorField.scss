@@ -20,9 +20,16 @@
 
   &.drag-clone {
     opacity: 0.8 !important;
-    transform: scale(1.05) rotate(2deg);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     cursor: grabbing !important;
+
+    input {
+      cursor: grabbing !important;
+    }
+
+    .color-drag-handle {
+      cursor: grabbing !important;
+    }
   }
 
   .color-drag-handle {

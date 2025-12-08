@@ -32,7 +32,7 @@ export default class ColorField extends React.Component {
     }
   }
 
-  onCloseClick(e) {
+  onCloseClick() {
     this.props.callback(this.props.colorId)
   }
 
@@ -83,14 +83,67 @@ export default class ColorField extends React.Component {
     this.dragClone.style.height = rect.height + 'px'
     this.dragClone.style.pointerEvents = 'none'
     this.dragClone.style.zIndex = '1000'
-    this.dragClone.style.opacity = '0.8'
 
-    // Copy the background color from the original input to the clone
+    // Copy ALL computed styles from the original container
+    const originalStyle = window.getComputedStyle(this.mount)
+    this.dragClone.style.border = originalStyle.border
+    this.dragClone.style.borderRadius = originalStyle.borderRadius
+    this.dragClone.style.boxShadow = originalStyle.boxShadow
+    this.dragClone.style.transform = originalStyle.transform
+
+    // Copy essential styles from the original input to maintain appearance
     const originalInput = this.mount.querySelector('.color')
     const cloneInput = this.dragClone.querySelector('.color')
     if (originalInput && cloneInput) {
       const computedStyle = window.getComputedStyle(originalInput)
+      cloneInput.style.width = '100%'
+      cloneInput.style.height = computedStyle.height
       cloneInput.style.backgroundColor = computedStyle.backgroundColor
+      cloneInput.style.color = computedStyle.color
+      cloneInput.style.border = computedStyle.border
+      cloneInput.style.borderRadius = computedStyle.borderRadius
+      cloneInput.style.borderColor = computedStyle.borderColor
+      cloneInput.style.boxShadow = computedStyle.boxShadow
+      cloneInput.style.textAlign = 'center'
+      cloneInput.style.paddingLeft = '30px'
+      cloneInput.style.paddingRight = '30px'
+      cloneInput.style.fontSize = computedStyle.fontSize
+      cloneInput.style.fontWeight = 'bold'
+      cloneInput.style.fontFamily = computedStyle.fontFamily
+      cloneInput.style.letterSpacing = computedStyle.letterSpacing
+      cloneInput.style.boxSizing = 'border-box'
+    }
+
+    // Copy styles from drag handle
+    const originalHandle = this.mount.querySelector('.color-drag-handle')
+    const cloneHandle = this.dragClone.querySelector('.color-drag-handle')
+    if (originalHandle && cloneHandle) {
+      const computedStyle = window.getComputedStyle(originalHandle)
+      cloneHandle.style.position = computedStyle.position
+      cloneHandle.style.left = computedStyle.left
+      cloneHandle.style.top = computedStyle.top
+      cloneHandle.style.width = computedStyle.width
+      cloneHandle.style.height = computedStyle.height
+      cloneHandle.style.color = computedStyle.color
+    }
+
+    // Copy styles from close button
+    const originalCloseButton = this.mount.querySelector('.color-close-button')
+    const cloneCloseButton = this.dragClone.querySelector('.color-close-button')
+    if (originalCloseButton && cloneCloseButton) {
+      const computedStyle = window.getComputedStyle(originalCloseButton)
+      cloneCloseButton.style.position = computedStyle.position
+      cloneCloseButton.style.right = computedStyle.right
+      cloneCloseButton.style.top = computedStyle.top
+      cloneCloseButton.style.width = computedStyle.width
+      cloneCloseButton.style.height = computedStyle.height
+    }
+
+    const originalClose = this.mount.querySelector('.color-close-button svg')
+    const cloneClose = this.dragClone.querySelector('.color-close-button svg')
+    if (originalClose && cloneClose) {
+      const computedStyle = window.getComputedStyle(originalClose)
+      cloneClose.style.fill = computedStyle.fill
     }
 
     document.body.appendChild(this.dragClone)
