@@ -4,11 +4,12 @@
   height: 60px;
   margin-bottom: 10px;
   opacity: 0;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease, opacity 0.2s ease;
   border: 2px solid transparent;
 
   &.dragging {
-    opacity: 0.4 !important;
+    opacity: 0.3 !important;
+    transform: scale(0.95);
   }
 
   &.drag-over {
@@ -17,10 +18,11 @@
     transform: scale(1.05);
   }
 
-  &.dragging.drag-over {
-    border: 2px solid transparent;
-    box-shadow: none;
-    transform: none;
+  &.drag-clone {
+    opacity: 0.8 !important;
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    cursor: grabbing !important;
   }
 
   .color-drag-handle {

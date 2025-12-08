@@ -531,22 +531,29 @@ export default class DisplayCanvas extends React.Component {
   }
 
   onReorderColors(draggedColorId, targetColorId) {
-    // Update all color values from DOM first
-    let colorFields = document.querySelectorAll('.color')
-    let colors = this.state.colors.map((colorObj, index) => ({
-      ...colorObj,
-      value: colorFields[index] ? colorFields[index].value : colorObj.value
-    }))
+    // Update all color values from DOM first by matching data-color-id
+    let colors = this.state.colors.map((colorObj) => {
+      const colorField = document.querySelector(`.color-container[data-color-id="${colorObj.id}"] .color`)
+      return {
+        ...colorObj,
+        value: colorField ? colorField.value : colorObj.value
+      }
+    })
 
     // Find indices
     const draggedIndex = colors.findIndex(c => c.id === draggedColorId)
     const targetIndex = colors.findIndex(c => c.id === targetColorId)
 
-    if (draggedIndex === -1 || targetIndex === -1) return
+    if (draggedIndex === -1 || targetIndex === -1 || draggedIndex === targetIndex) return
 
-    // Reorder array
-    const [removed] = colors.splice(draggedIndex, 1)
-    colors.splice(targetIndex, 0, removed)
+    // Remove the dragged item
+    const [draggedItem] = colors.splice(draggedIndex, 1)
+
+    // Find the new target index (it may have shifted after removal)
+    const newTargetIndex = colors.findIndex(c => c.id === targetColorId)
+
+    // Insert the dragged item at the target position
+    colors.splice(newTargetIndex, 0, draggedItem)
 
     this.setState({
       colors: colors
