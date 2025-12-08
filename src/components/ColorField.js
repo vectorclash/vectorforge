@@ -40,17 +40,33 @@ export default class ColorField extends React.Component {
     this.adjustColor(e.target.value)
   }
 
-  onMouseDown(e) {
+  getPointerPosition(e) {
+    // Handle both mouse and touch events
+    if (e.touches && e.touches.length > 0) {
+      return {
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY
+      }
+    }
+    return {
+      clientX: e.clientX,
+      clientY: e.clientY
+    }
+  }
+
+  startDrag(e) {
     // Only start drag from the drag handle
-    if (!e.target.classList.contains('color-drag-handle')) {
+    const target = e.target || (e.touches && e.touches[0].target)
+    if (!target || !target.classList.contains('color-drag-handle')) {
       return
     }
 
     e.preventDefault()
 
     this.isDragging = true
-    this.startX = e.clientX
-    this.startY = e.clientY
+    const pos = this.getPointerPosition(e)
+    this.startX = pos.clientX
+    this.startY = pos.clientY
 
     // Get initial position
     const rect = this.mount.getBoundingClientRect()
@@ -82,24 +98,35 @@ export default class ColorField extends React.Component {
     // Add dragging class to original
     this.mount.classList.add('dragging')
 
-    // Add listeners
+    // Add listeners for both mouse and touch
     document.addEventListener('mousemove', this.onMouseMove.bind(this))
     document.addEventListener('mouseup', this.onMouseUp.bind(this))
+    document.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false })
+    document.addEventListener('touchend', this.onTouchEnd.bind(this))
   }
 
-  onMouseMove(e) {
+  onMouseDown(e) {
+    this.startDrag(e)
+  }
+
+  onTouchStart(e) {
+    this.startDrag(e)
+  }
+
+  handleMove(e) {
     if (!this.isDragging || !this.dragClone) return
 
     e.preventDefault()
 
-    const deltaX = e.clientX - this.startX
-    const deltaY = e.clientY - this.startY
+    const pos = this.getPointerPosition(e)
+    const deltaX = pos.clientX - this.startX
+    const deltaY = pos.clientY - this.startY
 
     this.dragClone.style.left = (this.initialX + deltaX) + 'px'
     this.dragClone.style.top = (this.initialY + deltaY) + 'px'
 
     // Check if we're over another color container
-    const elements = document.elementsFromPoint(e.clientX, e.clientY)
+    const elements = document.elementsFromPoint(pos.clientX, pos.clientY)
     const targetContainer = elements.find(el => {
       // Must be a color-container
       if (!el.classList.contains('color-container')) return false
@@ -130,7 +157,15 @@ export default class ColorField extends React.Component {
     }
   }
 
-  onMouseUp(e) {
+  onMouseMove(e) {
+    this.handleMove(e)
+  }
+
+  onTouchMove(e) {
+    this.handleMove(e)
+  }
+
+  handleEnd() {
     if (!this.isDragging) return
 
     this.isDragging = false
@@ -163,6 +198,16 @@ export default class ColorField extends React.Component {
     // Remove listeners
     document.removeEventListener('mousemove', this.onMouseMove.bind(this))
     document.removeEventListener('mouseup', this.onMouseUp.bind(this))
+    document.removeEventListener('touchmove', this.onTouchMove.bind(this))
+    document.removeEventListener('touchend', this.onTouchEnd.bind(this))
+  }
+
+  onMouseUp() {
+    this.handleEnd()
+  }
+
+  onTouchEnd() {
+    this.handleEnd()
   }
 
   render() {
@@ -172,6 +217,7 @@ export default class ColorField extends React.Component {
         ref={mount => { this.mount = mount }}
         data-color-id={this.props.colorId}
         onMouseDown={this.onMouseDown.bind(this)}
+        onTouchStart={this.onTouchStart.bind(this)}
       >
         <div className="color-drag-handle">
           ⋮⋮
