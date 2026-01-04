@@ -19,7 +19,7 @@ const astroNouns = [
   'Star',
   'Umbra',
   'Wavelength'
-]
+];
 
 const astroAdj = [
   'Binary',
@@ -41,14 +41,16 @@ const astroAdj = [
   'Sidereal',
   'Supergiant',
   'Terrestrial'
-]
+];
 
 export default function FileName() {
-  let name = astroAdj[Math.floor(Math.random() * astroAdj.length)] + astroNouns[Math.floor(Math.random() * astroNouns.length)]
+  let name =
+    astroAdj[Math.floor(Math.random() * astroAdj.length)] +
+    astroNouns[Math.floor(Math.random() * astroNouns.length)];
   // let d = Date.now()
-  let d1 = Math.floor(1000000 + Math.random() * 9000000)
+  let d1 = Math.floor(1000000 + Math.random() * 9000000);
 
-  name += '_' + d1
+  name += '_' + d1;
 
-  return name
+  return name;
 }

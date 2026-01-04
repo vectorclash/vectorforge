@@ -4,7 +4,11 @@
   height: 60px;
   margin-bottom: 10px;
   opacity: 0;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border 0.2s ease,
+    opacity 0.2s ease;
   border: 2px solid transparent;
 
   &.dragging {
@@ -70,7 +74,9 @@
   }
 
   input:hover {
-    box-shadow: inset 0px 0px 5px rgba(#59069a, 0.6), 0px 0px 20px rgba(#2cd8fe, 0.6);
+    box-shadow:
+      inset 0px 0px 5px rgba(#59069a, 0.6),
+      0px 0px 20px rgba(#2cd8fe, 0.6);
   }
 
   .color-close-button {

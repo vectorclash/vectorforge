@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 export default class SettingsButton extends React.Component {
   render() {
@@ -31,6 +31,6 @@ export default class SettingsButton extends React.Component {
           <rect x="224" y="64" width="64" height="64" />
         </g>
       </svg>
-    )
+    );
   }
 }
